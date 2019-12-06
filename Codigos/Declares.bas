@@ -3,10 +3,6 @@ Option Explicit
 
 Public indexs As Integer
 
-Public font_list() As D3DXFont
-Public mode        As Boolean
-Public temp_rgb(3) As Long
-
 'drag&drop cosas
 Public Declare Function ReleaseCapture Lib "user32" () As Long
 
@@ -22,35 +18,15 @@ Public Const WM_NCLBUTTONDOWN = &HA1
 
 Public DataChanged As Boolean
 
-Public grh_index   As Byte
-
 Public Type tCabecera 'Cabecera de los con
     desc As String * 255
     CRC As Long
     MagicWord As Long
 End Type
 
-Public MiCabecera As tCabecera
-
 Public SurfaceDB  As clsTexManager
 
 Public FileManager As clsIniManager
-
-Public NumEscudosAnims            As Integer
-
-Public ArmasHerrero(0 To 100)     As Integer
-Public ArmadurasHerrero(0 To 100) As Integer
-Public ObjCarpintero(0 To 100)    As Integer
-
-Public CnTd                       As Byte
-
-Public SecuenciaMacroHechizos     As Byte
-
-'[KEVIN]
-Public Const MAX_BANCOINVENTORY_SLOTS = 40
-
-Public UserBancoInventory(1 To MAX_BANCOINVENTORY_SLOTS) As Inventory
-'[/KEVIN]
 
 Public Tips()                                            As String * 255
 
@@ -89,52 +65,8 @@ Type Inventory
 
 End Type
 
-Public Nombres            As Boolean
-
-Public MixedKey           As Long
-
-'User status vars
-Public UserPassword       As String
-
-Public UserName           As String
-
-Public Musica             As Boolean
-
-Public Sound              As Boolean
-
-Public SkillPoints        As Integer
-
-Public Alocados           As Integer
-
-Public flags()            As Integer
-
-Public Oscuridad          As Integer
-
-Public logged             As Boolean
-
-Public NoPuedeUsar        As Boolean
-
-'Server stuff
-Public RequestPosTimer   As Integer 'Used in main loop
-
-Public stxtbuffer        As String 'Holds temp raw data from server
-
-Public stxtbuffercmsg    As String 'Holds temp raw data from server
-
-Public SendNewChar       As Boolean 'Used during login
-
-Public Connected         As Boolean 'True when connected to server
-
-Public DownloadingMap    As Boolean 'Currently downloading a map from server
-
-Public UserMap           As Integer
-
 'Control
 Public prgRun            As Boolean 'When true the program ends
-
-Public IPdelServidor     As String
-
-Public PuertoDelServidor As String
 
 '
 '********** FUNCIONES API ***********

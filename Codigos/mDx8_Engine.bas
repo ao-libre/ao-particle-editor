@@ -8,18 +8,9 @@ Private Type decoration
     subtile_pos As Byte
 End Type
 
-Dim base_tile_size As Integer
-
 Public bRunning           As Boolean
 
 Private Const FVF = D3DFVF_XYZRHW Or D3DFVF_TEX1 Or D3DFVF_DIFFUSE Or D3DFVF_SPECULAR
-
-Dim font_count      As Long
-Dim font_last       As Long
-Private font_list() As D3DXFont
-
-Dim texture      As Direct3DTexture8
-Dim TransTexture As Direct3DTexture8
 
 Private Declare Function QueryPerformanceFrequency _
                 Lib "kernel32" (lpFrequency As Currency) As Long
@@ -32,8 +23,6 @@ Private FramesPerSecCounter    As Integer
 Private timerElapsedTime       As Single
 Private timerTicksPerFrame     As Double
 
-Private particletimer          As Single
-
 Public engineBaseSpeed         As Single
 
 Private lFrameTimer            As Long
@@ -45,44 +34,10 @@ Private ScrollPixelsPerFrameY  As Byte
 Private TileBufferPixelOffsetX As Integer
 Private TileBufferPixelOffsetY As Integer
 
-Private MainViewTop            As Integer
-Private MainViewLeft           As Integer
-
-Private MainDestRect           As RECT
-Private MainViewRect           As RECT
-Private BackBufferRect         As RECT
-
-Private MainViewWidth          As Integer
-Private MainViewHeight         As Integer
-
-Private MouseTileX             As Byte
-Private MouseTileY             As Byte
-
-Private iFrameIndex            As Byte  'Frame actual de la LL
-
-Private llTick                 As Long  'Contador
-
-Private WindowTileWidth        As Integer
-Private WindowTileHeight       As Integer
-
 Private HalfWindowTileWidth    As Integer
 Private HalfWindowTileHeight   As Integer
 
-Dim dimeTex             As Long
-
-Dim tex                 As Direct3DTexture8
-Dim D3DbackBuffer       As Direct3DSurface8
-Dim zTarget             As Direct3DSurface8
-Dim stencil             As Direct3DSurface8
-Dim superTex            As Direct3DSurface8
-Dim bump_map_texture    As Direct3DTexture8
-Dim bump_map_texture_ex As Direct3DTexture8
-Dim bump_map_supported  As Boolean
-Dim bump_map_powa       As Boolean
-
-Dim char_last           As Long
-Dim char_list()         As Char
-Dim char_count          As Long
+Private bump_map_supported As Boolean
 
 'Sets a Grh animation to loop indefinitely.
 Private Declare Function BitBlt _
@@ -224,9 +179,6 @@ Public Sub Engine_Init()
     
     ScrollPixelsPerFrameX = 8
     ScrollPixelsPerFrameY = 8
-    
-    UserPos.x = 50
-    UserPos.Y = 50
     
     MinXBorder = XMinMapSize
     MaxXBorder = XMaxMapSize
@@ -576,11 +528,6 @@ Public Sub Device_Box_Textured_Render(ByVal grhindex As Long, _
 End Sub
 
 Public Sub Start()
-
-    Dim f              As Boolean
-    Dim ulttick        As Long, esttick As Long
-    Dim timers(1 To 2) As Integer
-    Dim LoopC          As Integer
     
     With vertList(0)
         .x = 0
@@ -775,9 +722,6 @@ Private Sub Grh_Render(ByRef Grh As Grh, _
     'Added centering
     '**************************************************************
     On Error Resume Next
-
-    Dim tile_width  As Integer
-    Dim tile_height As Integer
 
     Dim grh_index   As Long
    

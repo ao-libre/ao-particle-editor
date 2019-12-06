@@ -2241,14 +2241,6 @@ End Sub
 
 Private Sub lstSelGrhs_Click()
 
-    Dim filepath   As String
-
-    Dim src_x      As Long
-    Dim src_y      As Long
-
-    Dim src_width  As Long
-    Dim src_height As Long
-
     Dim framecount As Long
     If framecount <= 0 Then Exit Sub
 

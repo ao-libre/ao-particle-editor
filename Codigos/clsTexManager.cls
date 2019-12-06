@@ -36,8 +36,6 @@ Private TexList(HASH_TABLE_SIZE - 1) As HashNode
 Private mD3D                         As D3DX8
 Private device                       As Direct3DDevice8
 
-Private mMaxEntries                  As Integer
-
 Private mCantidadGraficos            As Integer
 
 Private maxBytesToUse                As Long

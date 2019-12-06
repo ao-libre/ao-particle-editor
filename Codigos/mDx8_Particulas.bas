@@ -4,7 +4,6 @@ Option Explicit
 'Particle Groups
 Public TotalStreams As Integer
 Public StreamData() As Stream
-Public Particula()  As Stream
 
 Public Type Stream
 

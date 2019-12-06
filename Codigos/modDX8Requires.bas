@@ -46,51 +46,16 @@ Private Declare Sub GlobalMemoryStatus Lib "kernel32" (lpBuffer As MEMORYSTATUS)
 Public Function General_Bytes_To_Megabytes(Bytes As Double) As Double
 
     Dim dblAns As Double
-
-    dblAns = (Bytes / 1024) / 1024
+        dblAns = (Bytes / 1024) / 1024
+    
     General_Bytes_To_Megabytes = format(dblAns, "###,###,##0.00")
 
 End Function
 
-Public Function General_Get_Free_Ram() As Double
-
-    'Return Value in Megabytes
-    Dim dblAns As Double
-
-    GlobalMemoryStatus pUdtMemStatus
-    dblAns = pUdtMemStatus.dwAvailPhys
-    General_Get_Free_Ram = General_Bytes_To_Megabytes(dblAns)
-
-End Function
-
 Public Function General_Get_Free_Ram_Bytes() As Long
-    GlobalMemoryStatus pUdtMemStatus
-    General_Get_Free_Ram_Bytes = pUdtMemStatus.dwAvailPhys
-
-End Function
-
-Public Function ARGB(ByVal r As Long, _
-                     ByVal g As Long, _
-                     ByVal B As Long, _
-                     ByVal a As Long) As Long
-        
-    Dim c As Long
-        
-    If a > 127 Then
-        a = a - 128
-        c = a * 2 ^ 24 Or &H80000000
-        c = c Or r * 2 ^ 16
-        c = c Or g * 2 ^ 8
-        c = c Or B
-    Else
-        c = a * 2 ^ 24
-        c = c Or r * 2 ^ 16
-        c = c Or g * 2 ^ 8
-        c = c Or B
-
-    End If
     
-    ARGB = c
-
+    Call GlobalMemoryStatus(pUdtMemStatus)
+    
+    General_Get_Free_Ram_Bytes = pUdtMemStatus.dwAvailPhys
+    
 End Function
-

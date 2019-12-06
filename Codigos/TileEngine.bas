@@ -128,62 +128,14 @@ Public MaxXBorder              As Byte
 Public MinYBorder              As Byte
 Public MaxYBorder              As Byte
 
-'Status del user
-Public CurMap                  As Integer 'Mapa actual
-Public UserIndex               As Integer
-Public UserMoving              As Byte
-Public UserBody                As Integer
-Public UserHead                As Integer
-Public UserPos                 As Position 'Posicion
-
-Public AddtoUserPos            As Position 'Si se mueve
-Public UserCharIndex           As Integer
-
 Public EngineRun               As Boolean
 
 Public FPS                     As Long
-Public FramesPerSecCounter     As Long
-Private fpsLastCheck           As Long
-
-'Tamaño del la vista en Tiles
-Private WindowTileWidth        As Integer
-Private WindowTileHeight       As Integer
-
-Private HalfWindowTileWidth    As Integer
-Private HalfWindowTileHeight   As Integer
-
-'Offset del desde 0,0 del main view
-Private MainViewTop            As Integer
-Private MainViewLeft           As Integer
 
 'Cuantos tiles el engine mete en el BUFFER cuando
 'dibuja el mapa. Ojo un tamaño muy grande puede
 'volver el engine muy lento
 Public TileBufferSize          As Integer
-Private TileBufferPixelOffsetX As Integer
-Private TileBufferPixelOffsetY As Integer
-
-'Tamaño de los tiles en pixels
-Public TilePixelHeight         As Integer
-Public TilePixelWidth          As Integer
-
-'Number of pixels the engine scrolls per frame. MUST divide evenly into pixels per tile
-Public ScrollPixelsPerFrameX   As Integer
-Public ScrollPixelsPerFrameY   As Integer
-
-Dim timerElapsedTime           As Single
-Dim timerTicksPerFrame         As Single
-Dim engineBaseSpeed            As Single
-
-Public NumChars                As Integer
-Public LastChar                As Integer
-
-Private MainDestRect           As RECT
-Private MainViewRect           As RECT
-Private BackBufferRect         As RECT
-
-Private MainViewWidth          As Integer
-Private MainViewHeight         As Integer
 
 ' ARRAYS GLOBALES
 Public GrhData()               As GrhData 'Guarda todos los grh
@@ -263,86 +215,6 @@ Function InMapBounds(ByVal x As Integer, ByVal Y As Integer) As Boolean
     InMapBounds = True
 
 End Function
-
-Public Sub Grh_Render_To_Hdc(ByVal desthDC As Long, _
-                             ByVal grh_index As Long, _
-                             ByVal screen_x As Integer, _
-                             ByVal screen_y As Integer, _
-                             Optional transparent As Boolean = False)
-    '**************************************************************
-    'Author: Aaron Perkins
-    'Last Modify Date: 8/30/2004
-    'This method is SLOW... Don't use in a loop if you care about
-    'speed!
-    'Modified by Juan Martín Sotuyo Dodero
-    '*************************************************************
-    
-    On Error GoTo ErrorHandler
-    
-    Dim file_path  As String
-
-    Dim src_x      As Integer
-    Dim src_y      As Integer
-
-    Dim src_width  As Integer
-    Dim src_height As Integer
-
-    Dim hdcsrc     As Long
-    Dim MaskDC     As Long
-    Dim PrevObj    As Long
-    Dim PrevObj2   As Long
-
-    If grh_index <= 0 Then Exit Sub
-    
-    With GrhData(grh_index)
-    
-        'If it's animated switch grh_index to first frame
-        If .NumFrames <> 1 Then
-            grh_index = .Frames(1)
-        End If
-    
-        file_path = App.Path & "\Graficos\" & .FileNum & ".bmp"
-            
-        src_x = .SX
-        src_y = .SY
-        src_width = .pixelWidth
-        src_height = .pixelHeight
-    
-    End With
-    
-            
-    hdcsrc = CreateCompatibleDC(desthDC)
-    PrevObj = SelectObject(hdcsrc, LoadPicture(file_path))
-        
-    If transparent = False Then
-        
-        Call BitBlt(desthDC, screen_x, screen_y, src_width, src_height, hdcsrc, src_x, src_y, vbSrcCopy)
-    
-    Else
-    
-        MaskDC = CreateCompatibleDC(desthDC)
-        PrevObj2 = SelectObject(MaskDC, LoadPicture(file_path))
-            
-        Call Grh_Create_Mask(hdcsrc, MaskDC, src_x, src_y, src_width, src_height)
-            
-        'Render tranparently
-        Call BitBlt(desthDC, screen_x, screen_y, src_width, src_height, MaskDC, src_x, src_y, vbSrcAnd)
-        Call BitBlt(desthDC, screen_x, screen_y, src_width, src_height, hdcsrc, src_x, src_y, vbSrcPaint)
-            
-        Call DeleteObject(SelectObject(MaskDC, PrevObj2))
-            
-        Call DeleteDC(MaskDC)
-
-    End If
-        
-    Call DeleteObject(SelectObject(hdcsrc, PrevObj))
-    Call DeleteDC(hdcsrc)
-    
-    Exit Sub
-    
-ErrorHandler:
-    
-End Sub
 
 Private Sub Grh_Create_Mask(ByRef hdcsrc As Long, _
                             ByRef MaskDC As Long, _
