@@ -36,47 +36,18 @@ End Type
 
 'apunta a una estructura grhdata y mantiene la animacion
 Public Type Grh
-
     grhindex As Integer
     FrameCounter As Single
     speed As Single
     Started As Byte
     Loops As Integer
     angle As Single
-
-End Type
-
-'Info de un objeto
-Public Type Obj
-
-    OBJIndex As Integer
-    Amount As Integer
-
 End Type
 
 'Tipo de las celdas del mapa
 Public Type MapBlock
-
-    Graphic(1 To 4) As Grh
-    CharIndex As Integer
-    ObjGrh As Grh
-    
-    light_value(3) As Long
-    
-    luz As Integer
-    Color(3) As Long
-    
     particle_group As Integer
-    
-    NPCIndex As Integer
-    OBJInfo As Obj
-    Blocked As Byte
-    
-    Trigger As Integer
-
 End Type
-
-Public EngineRun               As Boolean
 
 Public FPS                     As Long
 

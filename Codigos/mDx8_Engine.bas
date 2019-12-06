@@ -2,8 +2,6 @@ Attribute VB_Name = "mDx8_Engine"
 'MOTOR GRÁFICO ESCRITO(mayormente) POR MENDUZ@NOICODER.COM
 Option Explicit
 
-Public bRunning           As Boolean
-
 Private Declare Function QueryPerformanceFrequency _
                 Lib "kernel32" (lpFrequency As Currency) As Long
 
@@ -11,14 +9,13 @@ Private Declare Function QueryPerformanceCounter _
                 Lib "kernel32" (lpPerformanceCount As Currency) As Long
 
 Public FPS                     As Integer
-Private FramesPerSecCounter    As Integer
-Private timerElapsedTime       As Single
-Private timerTicksPerFrame     As Double
+Public FramesPerSecCounter    As Integer
+Public timerElapsedTime       As Single
+Public timerTicksPerFrame     As Double
 
 Public engineBaseSpeed         As Single
 
 Private lFrameTimer            As Long
-Private lFrameLimiter          As Long
 
 Private HalfWindowTileWidth    As Integer
 Private HalfWindowTileHeight   As Integer
@@ -162,30 +159,29 @@ Public Sub Engine_Init()
     
     End With
     
-    Call SurfaceDB.Init(D3DX, D3DDevice, General_Get_Free_Ram_Bytes)
+    Call SurfaceDB.Init(D3DX, D3DDevice)
 
     engineBaseSpeed = 0.017
     
     ReDim MapData(XMinMapSize To XMaxMapSize, YMinMapSize To YMaxMapSize) As MapBlock
-     
-    bRunning = True
-    
+
     Exit Sub
     
 ErrHandler:
     Debug.Print "Error: " & Err.Number
-    bRunning = False
-
+    End
+    
 End Sub
 
 Public Sub Engine_DeInitialize()
 
     Erase MapData
-    Erase charlist
     Erase particle_group_list
+    
     Set D3DDevice = Nothing
     Set D3D = Nothing
     Set DirectX = Nothing
+    
     End
 
 End Sub
@@ -223,7 +219,6 @@ Public Sub Render()
     
     End With
 
-    lFrameLimiter = GetTickCount
     FramesPerSecCounter = FramesPerSecCounter + 1
     timerElapsedTime = GetElapsedTime()
     timerTicksPerFrame = timerElapsedTime * engineBaseSpeed
@@ -564,7 +559,6 @@ Public Sub Start()
     
     Call Engine_DeInitialize
 
-    EngineRun = False
     frmCargando.Show
 
     'Destruimos los objetos públicos creados
@@ -580,15 +574,15 @@ Private Function Engine_FToDW(f As Single) As Long
 
     ' single > long
     Dim buf As D3DXBuffer
-
     Set buf = D3DX.CreateBuffer(4)
+    
     Call D3DX.BufferSetData(buf, 0, 4, 1, f)
     Call D3DX.BufferGetData(buf, 0, 4, 1, Engine_FToDW)
 
 End Function
 
 Public Sub GrhRenderToHdc(ByVal grh_index As Long, _
-                          desthDC As Long, _
+                          ByVal desthDC As Long, _
                           ByVal screen_x As Integer, _
                           ByVal screen_y As Integer, _
                           Optional transparent As Boolean = False)
@@ -596,57 +590,58 @@ Public Sub GrhRenderToHdc(ByVal grh_index As Long, _
     On Error Resume Next
 
     Dim file_path  As String
-
     Dim src_x      As Integer
     Dim src_y      As Integer
-
     Dim src_width  As Integer
     Dim src_height As Integer
-
     Dim hdcsrc     As Long
     Dim MaskDC     As Long
     Dim PrevObj    As Long
     Dim PrevObj2   As Long
 
     If grh_index <= 0 Then Exit Sub
+    
+    With GrhData(grh_index)
+    
+        'If it's animated switch grh_index to first frame
+        If .NumFrames <> 1 Then
+            grh_index = .Frames(1)
+        End If
 
-    'If it's animated switch grh_index to first frame
-    If GrhData(grh_index).NumFrames <> 1 Then
-        grh_index = GrhData(grh_index).Frames(1)
-
-    End If
-
-    file_path = DirGraficos & GrhData(grh_index).FileNum & ".bmp"
+        file_path = DirGraficos & .FileNum & ".bmp"
         
-    src_x = GrhData(grh_index).SX
-    src_y = GrhData(grh_index).SY
-    src_width = GrhData(grh_index).pixelWidth
-    src_height = GrhData(grh_index).pixelHeight
+        src_x = .SX
+        src_y = .SY
+        src_width = .pixelWidth
+        src_height = .pixelHeight
+    
+    End With
             
     hdcsrc = CreateCompatibleDC(desthDC)
     PrevObj = SelectObject(hdcsrc, LoadPicture(file_path))
         
     If transparent = False Then
-        BitBlt desthDC, screen_x, screen_y, src_width, src_height, hdcsrc, src_x, src_y, vbSrcCopy
+        
+        Call BitBlt(desthDC, screen_x, screen_y, src_width, src_height, hdcsrc, src_x, src_y, vbSrcCopy)
+    
     Else
+        
         MaskDC = CreateCompatibleDC(desthDC)
-            
         PrevObj2 = SelectObject(MaskDC, LoadPicture(file_path))
             
-        Grh_Create_Mask hdcsrc, MaskDC, src_x, src_y, src_width, src_height
+        Call Grh_Create_Mask(hdcsrc, MaskDC, src_x, src_y, src_width, src_height)
             
         'Render tranparently
-        BitBlt desthDC, screen_x, screen_y, src_width, src_height, MaskDC, src_x, src_y, vbSrcAnd
-        BitBlt desthDC, screen_x, screen_y, src_width, src_height, hdcsrc, src_x, src_y, vbSrcPaint
+        Call BitBlt(desthDC, screen_x, screen_y, src_width, src_height, MaskDC, src_x, src_y, vbSrcAnd)
+        Call BitBlt(desthDC, screen_x, screen_y, src_width, src_height, hdcsrc, src_x, src_y, vbSrcPaint)
             
         Call DeleteObject(SelectObject(MaskDC, PrevObj2))
-            
-        DeleteDC MaskDC
+        Call DeleteDC(MaskDC)
 
     End If
         
     Call DeleteObject(SelectObject(hdcsrc, PrevObj))
-    DeleteDC hdcsrc
+    Call DeleteDC(hdcsrc)
 
     Exit Sub
 
@@ -660,11 +655,8 @@ Private Sub Grh_Create_Mask(ByRef hdcsrc As Long, _
                             ByVal src_height As Integer)
 
     Dim x          As Integer
-
     Dim Y          As Integer
-
     Dim TransColor As Long
-
     Dim ColorKey   As String
 
     ColorKey = "0"
@@ -676,11 +668,10 @@ Private Sub Grh_Create_Mask(ByRef hdcsrc As Long, _
         For x = src_x To src_width + src_x
 
             If GetPixel(hdcsrc, x, Y) = TransColor Then
-                SetPixel MaskDC, x, Y, vbWhite
-                SetPixel hdcsrc, x, Y, vbBlack
+                Call SetPixel(MaskDC, x, Y, vbWhite)
+                Call SetPixel(hdcsrc, x, Y, vbBlack)
             Else
-                SetPixel MaskDC, x, Y, vbBlack
-
+                Call SetPixel(MaskDC, x, Y, vbBlack)
             End If
 
         Next x
@@ -688,15 +679,15 @@ Private Sub Grh_Create_Mask(ByRef hdcsrc As Long, _
 
 End Sub
 
-Private Sub Grh_Render(ByRef Grh As Grh, _
-                       ByVal screen_x As Integer, _
-                       ByVal screen_y As Integer, _
-                       ByRef rgb_list() As Long, _
-                       Optional ByVal h_centered As Boolean = True, _
-                       Optional ByVal v_centered As Boolean = True, _
-                       Optional ByVal alpha_blend As Boolean = False, _
-                       Optional ByVal KillAnim As Boolean = 0, _
-                       Optional angle As Single)
+Public Sub Grh_Render(ByRef Grh As Grh, _
+                      ByVal screen_x As Integer, _
+                      ByVal screen_y As Integer, _
+                      ByRef rgb_list() As Long, _
+                      Optional ByVal h_centered As Boolean = True, _
+                      Optional ByVal v_centered As Boolean = True, _
+                      Optional ByVal alpha_blend As Boolean = False, _
+                      Optional ByVal KillAnim As Boolean = 0, _
+                      Optional angle As Single)
 
     '**************************************************************
     'Author: Aaron Perkins
@@ -706,60 +697,64 @@ Private Sub Grh_Render(ByRef Grh As Grh, _
     '**************************************************************
     On Error Resume Next
 
-    Dim grh_index   As Long
-   
-    If Grh.grhindex = 0 Then Exit Sub
+    Dim grh_index As Long
+    
+    With Grh
+    
+        If .grhindex = 0 Then Exit Sub
        
-    'Animation
-    If Grh.Started = 1 Then
-        Grh.FrameCounter = Grh.FrameCounter + (timerElapsedTime * GrhData(Grh.grhindex).NumFrames / Grh.speed)
+        'Animation
+        If .Started = 1 Then
+            .FrameCounter = .FrameCounter + (timerElapsedTime * GrhData(.grhindex).NumFrames / .speed)
 
-        If Grh.FrameCounter > GrhData(Grh.grhindex).NumFrames Then
-            Grh.FrameCounter = (Grh.FrameCounter Mod GrhData(Grh.grhindex).NumFrames) + 1
+            If .FrameCounter > GrhData(.grhindex).NumFrames Then
+                .FrameCounter = (.FrameCounter Mod GrhData(.grhindex).NumFrames) + 1
 
-            If Grh.Loops <> -1 Then
-                If Grh.Loops > 0 Then
-                    Grh.Loops = Grh.Loops - 1
-                Else
-                    Grh.Started = 0
+                If .Loops <> -1 Then
+                    
+                    If Grh.Loops > 0 Then
+                        .Loops = Grh.Loops - 1
+                    Else
+                        .Started = 0
+                    End If
 
                 End If
 
             End If
 
         End If
-
-    End If
  
-    'Figure out what frame to draw (always 1 if not animated)
-    If Grh.FrameCounter = 0 Then Grh.FrameCounter = 1
-    'If Not Grh_Check(Grh.grhindex) Then Exit Sub
-    grh_index = GrhData(Grh.grhindex).Frames(Grh.FrameCounter)
+        'Figure out what frame to draw (always 1 if not animated)
+        If .FrameCounter = 0 Then .FrameCounter = 1
+        
+        grh_index = GrhData(.grhindex).Frames(.FrameCounter)
 
-    If grh_index <= 0 Then Exit Sub
-    If GrhData(grh_index).FileNum = 0 Then Exit Sub
+        If grh_index <= 0 Then Exit Sub
+        If GrhData(grh_index).FileNum = 0 Then Exit Sub
        
-    'Modified by Augusto José Rando
-    'Simplier function - according to basic ORE engine
-    If h_centered Then
-        If GrhData(Grh.grhindex).TileWidth <> 1 Then
-            screen_x = screen_x - Int(GrhData(Grh.grhindex).TileWidth * (32 \ 2)) + 32 \ 2
+        'Modified by Augusto José Rando
+        'Simplier function - according to basic ORE engine
+        If h_centered Then
+        
+            If GrhData(.grhindex).TileWidth <> 1 Then
+                screen_x = screen_x - Int(GrhData(.grhindex).TileWidth * (32 \ 2)) + 32 \ 2
+            End If
 
         End If
-
-    End If
    
-    If v_centered Then
-        If GrhData(Grh.grhindex).TileHeight <> 1 Then
-            screen_y = screen_y - Int(GrhData(Grh.grhindex).TileHeight * 32) + 32
+        If v_centered Then
+        
+            If GrhData(.grhindex).TileHeight <> 1 Then
+                screen_y = screen_y - Int(GrhData(.grhindex).TileHeight * 32) + 32
+            End If
 
         End If
-
-    End If
    
-    'Draw it to device
-    Device_Box_Textured_Render grh_index, screen_x, screen_y, GrhData(grh_index).pixelWidth, GrhData(grh_index).pixelHeight, rgb_list(), GrhData(grh_index).SX, GrhData(grh_index).SY, alpha_blend, angle
- 
+        'Draw it to device
+        Call Device_Box_Textured_Render(grh_index, screen_x, screen_y, GrhData(grh_index).pixelWidth, GrhData(grh_index).pixelHeight, rgb_list(), GrhData(grh_index).SX, GrhData(grh_index).SY, alpha_blend, angle)
+    
+    End With
+    
 End Sub
 
 Private Sub Convert_Heading_to_Direction(ByVal Heading As Long, _
@@ -772,7 +767,6 @@ Private Sub Convert_Heading_to_Direction(ByVal Heading As Long, _
     '
     '**************************************************************
     Dim addy As Long
-
     Dim addx As Long
     
     'Figure out which way to move
@@ -812,601 +806,3 @@ Private Sub Convert_Heading_to_Direction(ByVal Heading As Long, _
     direction_y = direction_y + addy
 
 End Sub
-
-Private Function Particle_Group_Next_Open() As Long
-
-    '*****************************************************************
-    'Author: Aaron Perkins
-    'Last Modify Date: 10/07/2002
-    '
-    '*****************************************************************
-    On Error GoTo ErrorHandler:
-
-    Dim LoopC As Long
-    
-    LoopC = 1
-
-    Do Until particle_group_list(LoopC).active = False
-
-        If LoopC = particle_group_last Then
-            Particle_Group_Next_Open = particle_group_last + 1
-            Exit Function
-
-        End If
-
-        LoopC = LoopC + 1
-    Loop
-    
-    Particle_Group_Next_Open = LoopC
-    Exit Function
-ErrorHandler:
-    Particle_Group_Next_Open = 1
-
-End Function
-
-Public Function Particle_Group_Create(ByVal map_x As Integer, _
-                                      ByVal map_y As Integer, _
-                                      ByRef grh_index_list() As Long, _
-                                      ByRef rgb_list() As Long, _
-                                      Optional ByVal particle_count As Long = 20, _
-                                      Optional ByVal stream_type As Long = 1, _
-                                      Optional ByVal alpha_blend As Boolean, _
-                                      Optional ByVal alive_counter As Long = -1, _
-                                      Optional ByVal frame_speed As Single = 0.5, _
-                                      Optional ByVal id As Long, _
-                                      Optional ByVal x1 As Integer, _
-                                      Optional ByVal y1 As Integer, _
-                                      Optional ByVal angle As Integer, _
-                                      Optional ByVal vecx1 As Integer, _
-                                      Optional ByVal vecx2 As Integer, _
-                                      Optional ByVal vecy1 As Integer, _
-                                      Optional ByVal vecy2 As Integer, _
-                                      Optional ByVal life1 As Integer, _
-                                      Optional ByVal life2 As Integer, _
-                                      Optional ByVal fric As Integer, _
-                                      Optional ByVal spin_speedL As Single, _
-                                      Optional ByVal gravity As Boolean, _
-                                      Optional grav_strength As Long, _
-                                      Optional bounce_strength As Long, _
-                                      Optional ByVal x2 As Integer, Optional ByVal y2 As Integer, Optional ByVal XMove As Boolean, Optional ByVal move_x1 As Integer, Optional ByVal move_x2 As Integer, Optional ByVal move_y1 As Integer, Optional ByVal move_y2 As Integer, Optional ByVal YMove As Boolean, Optional ByVal spin_speedH As Single, Optional ByVal spin As Boolean, Optional grh_resize As Boolean, Optional grh_resizex As Integer, Optional grh_resizey As Integer, Optional ByVal Radio As Integer) As Long
-    
-    '**************************************************************
-    'Author: Aaron Perkins
-    'Last Modify Date: 12/15/2002
-    'Returns the particle_group_index if successful, else 0
-    '**************************************************************
-    If (map_x <> -1) And (map_y <> -1) Then
-        If Map_Particle_Group_Get(map_x, map_y) = 0 Then
-            Particle_Group_Create = Particle_Group_Next_Open
-            Particle_Group_Make Particle_Group_Create, map_x, map_y, particle_count, stream_type, grh_index_list(), rgb_list(), alpha_blend, alive_counter, frame_speed, id, x1, y1, angle, vecx1, vecx2, vecy1, vecy2, life1, life2, fric, spin_speedL, gravity, grav_strength, bounce_strength, x2, y2, XMove, move_x1, move_x2, move_y1, move_y2, YMove, spin_speedH, spin, grh_resize, grh_resizex, grh_resizey, Radio
-        Else
-            Particle_Group_Create = Particle_Group_Next_Open
-            Particle_Group_Make Particle_Group_Create, map_x, map_y, particle_count, stream_type, grh_index_list(), rgb_list(), alpha_blend, alive_counter, frame_speed, id, x1, y1, angle, vecx1, vecx2, vecy1, vecy2, life1, life2, fric, spin_speedL, gravity, grav_strength, bounce_strength, x2, y2, XMove, move_x1, move_x2, move_y1, move_y2, YMove, spin_speedH, spin, grh_resize, grh_resizex, grh_resizey, Radio
-
-        End If
-
-    End If
-
-End Function
-
-Public Function Particle_Group_Remove(ByVal particle_group_index As Long) As Boolean
-
-    '*****************************************************************
-    'Author: Aaron Perkins
-    'Last Modify Date: 1/04/2003
-    '
-    '*****************************************************************
-    'Make sure it's a legal index
-    If Particle_Group_Check(particle_group_index) Then
-        Particle_Group_Destroy particle_group_index
-        Particle_Group_Remove = True
-
-    End If
-
-End Function
-
-Public Function Particle_Group_Remove_All() As Boolean
-
-    '*****************************************************************
-    'Author: Aaron Perkins
-    'Last Modify Date: 1/04/2003
-    '
-    '*****************************************************************
-    Dim index As Long
-    
-    For index = 1 To particle_group_last
-
-        'Make sure it's a legal index
-        If Particle_Group_Check(index) Then
-            Particle_Group_Destroy index
-
-        End If
-
-    Next index
-    
-    Particle_Group_Remove_All = True
-
-End Function
-
-Public Function Particle_Group_Find(ByVal id As Long) As Long
-
-    '*****************************************************************
-    'Author: Aaron Perkins
-    'Last Modify Date: 1/04/2003
-    'Find the index related to the handle
-    '*****************************************************************
-    On Error GoTo ErrorHandler:
-
-    Dim LoopC As Long
-    
-    LoopC = 1
-
-    Do Until particle_group_list(LoopC).id = id
-
-        If LoopC = particle_group_last Then
-            Particle_Group_Find = 0
-            Exit Function
-
-        End If
-
-        LoopC = LoopC + 1
-    Loop
-    
-    Particle_Group_Find = LoopC
-    Exit Function
-ErrorHandler:
-    Particle_Group_Find = 0
-
-End Function
-
-Private Sub Particle_Group_Make(ByVal particle_group_index As Long, _
-                                ByVal map_x As Integer, _
-                                ByVal map_y As Integer, _
-                                ByVal particle_count As Long, _
-                                ByVal stream_type As Long, _
-                                ByRef grh_index_list() As Long, _
-                                ByRef rgb_list() As Long, _
-                                Optional ByVal alpha_blend As Boolean, _
-                                Optional ByVal alive_counter As Long = -1, _
-                                Optional ByVal frame_speed As Single = 0.5, _
-                                Optional ByVal id As Long, _
-                                Optional ByVal x1 As Integer, _
-                                Optional ByVal y1 As Integer, _
-                                Optional ByVal angle As Integer, _
-                                Optional ByVal vecx1 As Integer, _
-                                Optional ByVal vecx2 As Integer, _
-                                Optional ByVal vecy1 As Integer, _
-                                Optional ByVal vecy2 As Integer, _
-                                Optional ByVal life1 As Integer, _
-                                Optional ByVal life2 As Integer, _
-                                Optional ByVal fric As Integer, _
-                                Optional ByVal spin_speedL As Single, _
-                                Optional ByVal gravity As Boolean, _
-                                Optional grav_strength As Long, _
-                                Optional bounce_strength As Long, Optional ByVal x2 As Integer, Optional ByVal y2 As Integer, Optional ByVal XMove As Boolean, Optional ByVal move_x1 As Integer, Optional ByVal move_x2 As Integer, Optional ByVal move_y1 As Integer, Optional ByVal move_y2 As Integer, Optional ByVal YMove As Boolean, Optional ByVal spin_speedH As Single, Optional ByVal spin As Boolean, Optional grh_resize As Boolean, Optional grh_resizex As Integer, Optional grh_resizey As Integer, Optional Radio As Integer)
-
-    '*****************************************************************
-    'Author: Aaron Perkins
-    'Last Modify Date: 10/07/2002
-    'Makes a new particle effect
-    '*****************************************************************
-    'Update array size
-    If particle_group_index > particle_group_last Then
-        particle_group_last = particle_group_index
-        ReDim Preserve particle_group_list(1 To particle_group_last)
-
-    End If
-
-    particle_group_count = particle_group_count + 1
-    
-    'Make active
-    particle_group_list(particle_group_index).active = True
-    
-    'Map pos
-    If (map_x <> -1) And (map_y <> -1) Then
-        particle_group_list(particle_group_index).map_x = map_x
-        particle_group_list(particle_group_index).map_y = map_y
-
-    End If
-    
-    'Grh list
-    ReDim particle_group_list(particle_group_index).grh_index_list(1 To UBound(grh_index_list))
-    particle_group_list(particle_group_index).grh_index_list() = grh_index_list()
-    particle_group_list(particle_group_index).grh_index_count = UBound(grh_index_list)
-    
-    Rem Lord Fers
-    particle_group_list(particle_group_index).Radio = Radio
-    
-    'Sets alive vars
-    If alive_counter = -1 Then
-        particle_group_list(particle_group_index).alive_counter = -1
-        particle_group_list(particle_group_index).never_die = True
-    Else
-        particle_group_list(particle_group_index).alive_counter = alive_counter
-        particle_group_list(particle_group_index).never_die = False
-
-    End If
-    
-    'alpha blending
-    particle_group_list(particle_group_index).alpha_blend = alpha_blend
-    
-    'stream type
-    particle_group_list(particle_group_index).stream_type = stream_type
-    
-    'speed
-    particle_group_list(particle_group_index).frame_speed = frame_speed
-    
-    particle_group_list(particle_group_index).x1 = x1
-    particle_group_list(particle_group_index).y1 = y1
-    particle_group_list(particle_group_index).x2 = x2
-    particle_group_list(particle_group_index).y2 = y2
-    particle_group_list(particle_group_index).angle = angle
-    particle_group_list(particle_group_index).vecx1 = vecx1
-    particle_group_list(particle_group_index).vecx2 = vecx2
-    particle_group_list(particle_group_index).vecy1 = vecy1
-    particle_group_list(particle_group_index).vecy2 = vecy2
-    particle_group_list(particle_group_index).life1 = life1
-    particle_group_list(particle_group_index).life2 = life2
-    particle_group_list(particle_group_index).fric = fric
-    particle_group_list(particle_group_index).spin = spin
-    particle_group_list(particle_group_index).spin_speedL = spin_speedL
-    particle_group_list(particle_group_index).spin_speedH = spin_speedH
-    particle_group_list(particle_group_index).gravity = gravity
-    particle_group_list(particle_group_index).grav_strength = grav_strength
-    particle_group_list(particle_group_index).bounce_strength = bounce_strength
-    particle_group_list(particle_group_index).XMove = XMove
-    particle_group_list(particle_group_index).YMove = YMove
-    particle_group_list(particle_group_index).move_x1 = move_x1
-    particle_group_list(particle_group_index).move_x2 = move_x2
-    particle_group_list(particle_group_index).move_y1 = move_y1
-    particle_group_list(particle_group_index).move_y2 = move_y2
-    
-    particle_group_list(particle_group_index).rgb_list(0) = rgb_list(0)
-    particle_group_list(particle_group_index).rgb_list(1) = rgb_list(1)
-    particle_group_list(particle_group_index).rgb_list(2) = rgb_list(2)
-    particle_group_list(particle_group_index).rgb_list(3) = rgb_list(3)
-    
-    particle_group_list(particle_group_index).grh_resize = grh_resize
-    particle_group_list(particle_group_index).grh_resizex = grh_resizex
-    particle_group_list(particle_group_index).grh_resizey = grh_resizey
-    
-    'create particle stream
-    particle_group_list(particle_group_index).particle_count = particle_count
-    ReDim particle_group_list(particle_group_index).particle_stream(1 To particle_count)
-    
-    'plot particle group on map
-    MapData(map_x, map_y).particle_group = particle_group_index
-
-End Sub
-
-Private Sub Particle_Render(ByRef temp_particle As Particle, _
-                            ByVal screen_x As Integer, _
-                            ByVal screen_y As Integer, _
-                            ByVal grh_index As Long, _
-                            ByRef rgb_list() As Long, _
-                            Optional ByVal alpha_blend As Boolean, _
-                            Optional ByVal no_move As Boolean, _
-                            Optional ByVal x1 As Integer, _
-                            Optional ByVal y1 As Integer, _
-                            Optional ByVal angle As Integer, _
-                            Optional ByVal vecx1 As Integer, _
-                            Optional ByVal vecx2 As Integer, _
-                            Optional ByVal vecy1 As Integer, _
-                            Optional ByVal vecy2 As Integer, _
-                            Optional ByVal life1 As Integer, _
-                            Optional ByVal life2 As Integer, _
-                            Optional ByVal fric As Integer, _
-                            Optional ByVal spin_speedL As Single, _
-                            Optional ByVal gravity As Boolean, _
-                            Optional grav_strength As Long, _
-                            Optional ByVal bounce_strength As Long, _
-                            Optional ByVal x2 As Integer, _
-                            Optional ByVal y2 As Integer, _
-                            Optional ByVal XMove As Boolean, _
-                            Optional ByVal move_x1 As Integer, Optional ByVal move_x2 As Integer, Optional ByVal move_y1 As Integer, Optional ByVal move_y2 As Integer, Optional ByVal YMove As Boolean, Optional ByVal spin_speedH As Single, Optional ByVal spin As Boolean, Optional grh_resize As Boolean, Optional grh_resizex As Integer, Optional grh_resizey As Integer, Optional ByVal Radio As Integer, Optional ByVal count As Integer, Optional ByVal index As Integer)
-    '**************************************************************
-    'Author: Aaron Perkins
-    'Last Modify Date: 4/24/2003
-    '
-    '**************************************************************
-
-    If no_move = False Then
-        If temp_particle.alive_counter = 0 Then
-            InitGrh temp_particle.Grh, grh_index, alpha_blend
-
-            If Radio = 0 Then
-                temp_particle.x = RandomNumber(x1, x2)
-                temp_particle.Y = RandomNumber(y1, y2)
-            Else
-                temp_particle.x = (RandomNumber(x1, x2) + Radio) + Radio * Cos(PI * 2 * index / count)
-                temp_particle.Y = (RandomNumber(y1, y2) + Radio) + Radio * Sin(PI * 2 * index / count)
-
-            End If
-
-            temp_particle.vector_x = RandomNumber(vecx1, vecx2)
-            temp_particle.vector_y = RandomNumber(vecy1, vecy2)
-            temp_particle.angle = angle
-            temp_particle.alive_counter = RandomNumber(life1, life2)
-            temp_particle.friction = fric
-        Else
-
-            'Continue old particle
-            'Do gravity
-            If gravity = True Then
-                temp_particle.vector_y = temp_particle.vector_y + grav_strength
-
-                If temp_particle.Y > 0 Then
-                    'bounce
-                    temp_particle.vector_y = bounce_strength
-
-                End If
-
-            End If
-
-            'Do rotation
-            If spin = True Then temp_particle.Grh.angle = temp_particle.Grh.angle + (RandomNumber(spin_speedL, spin_speedH) / 100)
-            If temp_particle.angle >= 360 Then
-                temp_particle.angle = 0
-
-            End If
-                                
-            If XMove = True Then temp_particle.vector_x = RandomNumber(move_x1, move_x2)
-            If YMove = True Then temp_particle.vector_y = RandomNumber(move_y1, move_y2)
-
-        End If
-
-        'Add in vector
-        temp_particle.x = temp_particle.x + (temp_particle.vector_x \ temp_particle.friction)
-        temp_particle.Y = temp_particle.Y + (temp_particle.vector_y \ temp_particle.friction)
-    
-        'decrement counter
-        temp_particle.alive_counter = temp_particle.alive_counter - 1
-
-    End If
- 
-    'Draw it
-    Grh_Render temp_particle.Grh, temp_particle.x + screen_x, temp_particle.Y + screen_y, rgb_list(), 1, False, True, True, temp_particle.Grh.angle
-
-End Sub
-
-Private Sub Particle_Group_Render(ByVal particle_group_index As Long, _
-                                  ByVal screen_x As Integer, _
-                                  ByVal screen_y As Integer)
-
-    '*****************************************************************
-    'Author: Aaron Perkins
-    'Last Modify Date: 12/15/2002
-    'Renders a particle stream at a paticular screen point
-    '*****************************************************************
-    Dim LoopC            As Long
-
-    Dim temp_rgb(0 To 3) As Long
-
-    Dim no_move          As Boolean
-    
-    'Set colors
-    '   If UserMinHP = 0 Then
-    '       temp_rgb(0) = D3DColorARGB(particle_group_list(particle_group_index).alpha_blend, 255, 255, 255)
-    '      temp_rgb(1) = D3DColorARGB(particle_group_list(particle_group_index).alpha_blend, 255, 255, 255)
-    '       temp_rgb(2) = D3DColorARGB(particle_group_list(particle_group_index).alpha_blend, 255, 255, 255)
-    '       temp_rgb(3) = D3DColorARGB(particle_group_list(particle_group_index).alpha_blend, 255, 255, 255)
-    '   Else
-    temp_rgb(0) = particle_group_list(particle_group_index).rgb_list(0)
-    temp_rgb(1) = particle_group_list(particle_group_index).rgb_list(1)
-    temp_rgb(2) = particle_group_list(particle_group_index).rgb_list(2)
-    temp_rgb(3) = particle_group_list(particle_group_index).rgb_list(3)
-    '  End If
-        
-    If particle_group_list(particle_group_index).alive_counter Then
-    
-        'See if it is time to move a particle
-        particle_group_list(particle_group_index).frame_counter = particle_group_list(particle_group_index).frame_counter + timerTicksPerFrame
-
-        If particle_group_list(particle_group_index).frame_counter > particle_group_list(particle_group_index).frame_speed Then
-            particle_group_list(particle_group_index).frame_counter = 0
-            no_move = False
-        Else
-            no_move = True
-
-        End If
-    
-        'If it's still alive render all the particles inside
-        For LoopC = 1 To particle_group_list(particle_group_index).particle_count
-        
-            'Render particle
-            Particle_Render particle_group_list(particle_group_index).particle_stream(LoopC), _
-               screen_x, screen_y, _
-               particle_group_list(particle_group_index).grh_index_list(Round(RandomNumber(1, particle_group_list(particle_group_index).grh_index_count), 0)), _
-               temp_rgb(), _
-               particle_group_list(particle_group_index).alpha_blend, no_move, _
-               particle_group_list(particle_group_index).x1, particle_group_list(particle_group_index).y1, particle_group_list(particle_group_index).angle, _
-               particle_group_list(particle_group_index).vecx1, particle_group_list(particle_group_index).vecx2, _
-               particle_group_list(particle_group_index).vecy1, particle_group_list(particle_group_index).vecy2, _
-               particle_group_list(particle_group_index).life1, particle_group_list(particle_group_index).life2, _
-               particle_group_list(particle_group_index).fric, particle_group_list(particle_group_index).spin_speedL, _
-               particle_group_list(particle_group_index).gravity, particle_group_list(particle_group_index).grav_strength, _
-               particle_group_list(particle_group_index).bounce_strength, particle_group_list(particle_group_index).x2, _
-               particle_group_list(particle_group_index).y2, particle_group_list(particle_group_index).XMove, _
-               particle_group_list(particle_group_index).move_x1, particle_group_list(particle_group_index).move_x2, _
-               particle_group_list(particle_group_index).move_y1, particle_group_list(particle_group_index).move_y2, _
-               particle_group_list(particle_group_index).YMove, particle_group_list(particle_group_index).spin_speedH, _
-               particle_group_list(particle_group_index).spin, particle_group_list(particle_group_index).grh_resize, particle_group_list(particle_group_index).grh_resizex, particle_group_list(particle_group_index).grh_resizey, _
-               particle_group_list(particle_group_index).Radio, particle_group_list(particle_group_index).particle_count, LoopC
-                            
-        Next LoopC
-        
-        If no_move = False Then
-
-            'Update the group alive counter
-            If particle_group_list(particle_group_index).never_die = False Then
-                particle_group_list(particle_group_index).alive_counter = particle_group_list(particle_group_index).alive_counter - 1
-
-            End If
-
-        End If
-    
-    Else
-        'If it's dead destroy it
-        particle_group_list(particle_group_index).particle_count = particle_group_list(particle_group_index).particle_count - 1
-
-        If particle_group_list(particle_group_index).particle_count <= 0 Then Particle_Group_Destroy particle_group_index
-
-    End If
-
-End Sub
-
-Public Function Particle_Type_Get(ByVal particle_index As Long) As Long
-
-    '*****************************************************************
-    'Author: Juan Martín Sotuyo Dodero (juansotuyo@hotmail.com)
-    'Last Modify Date: 8/27/2003
-    'Returns the stream type of a particle stream
-    '*****************************************************************
-    If Particle_Group_Check(particle_index) Then
-        Particle_Type_Get = particle_group_list(particle_index).stream_type
-
-    End If
-
-End Function
-
-Private Function Particle_Group_Check(ByVal particle_group_index As Long) As Boolean
-
-    '**************************************************************
-    'Author: Aaron Perkins
-    'Last Modify Date: 1/04/2003
-    '
-    '**************************************************************
-    'check index
-    If particle_group_index > 0 And particle_group_index <= particle_group_last Then
-        If particle_group_list(particle_group_index).active Then
-            Particle_Group_Check = True
-
-        End If
-
-    End If
-
-End Function
-
-Public Function Particle_Group_Map_Pos_Set(ByVal particle_group_index As Long, _
-                                           ByVal map_x As Long, _
-                                           ByVal map_y As Long) As Boolean
-
-    '**************************************************************
-    'Author: Aaron Perkins
-    'Last Modify Date: 5/27/2003
-    'Returns true if successful, else false
-    '**************************************************************
-    'Make sure it's a legal index
-    If Particle_Group_Check(particle_group_index) Then
-
-        'Make sure it's a legal move
-        If InMapBounds(map_x, map_y) Then
-            'Move it
-            particle_group_list(particle_group_index).map_x = map_x
-            particle_group_list(particle_group_index).map_y = map_y
-    
-            Particle_Group_Map_Pos_Set = True
-
-        End If
-
-    End If
-
-End Function
-
-Public Function Particle_Group_Move(ByVal particle_group_index As Long, _
-                                    ByVal Heading As Long) As Boolean
-
-    '**************************************************************
-    'Author: Aaron Perkins
-    'Last Modify Date: 5/27/2003
-    'Returns true if successful, else false
-    '**************************************************************
-    Dim map_x As Long
-
-    Dim map_y As Long
-
-    Dim nX    As Long
-
-    Dim nY    As Long
-    
-    'Check for valid heading
-    If Heading < 1 Or Heading > 8 Then
-        Particle_Group_Move = False
-        Exit Function
-
-    End If
-    
-    'Make sure it's a legal index
-    If Particle_Group_Check(particle_group_index) Then
-    
-        map_x = particle_group_list(particle_group_index).map_x
-        map_y = particle_group_list(particle_group_index).map_y
-        
-        nX = map_x
-        nY = map_y
-        
-        Convert_Heading_to_Direction Heading, nX, nY
-        
-        'Make sure it's a legal move
-        If InMapBounds(nX, nY) Then
-            'Move it
-            particle_group_list(particle_group_index).map_x = nX
-            particle_group_list(particle_group_index).map_y = nY
-            
-            Particle_Group_Move = True
-
-        End If
-
-    End If
-
-End Function
-
-Private Sub Particle_Group_Destroy(ByVal particle_group_index As Long)
-
-    '**************************************************************
-    'Author: Aaron Perkins
-    'Last Modify Date: 10/07/2002
-    '
-    '**************************************************************
-    Dim temp As particle_group
-    
-    If particle_group_list(particle_group_index).map_x > 0 And particle_group_list(particle_group_index).map_y > 0 Then
-        MapData(particle_group_list(particle_group_index).map_x, particle_group_list(particle_group_index).map_y).particle_group = 0
-
-    End If
-    
-    particle_group_list(particle_group_index) = temp
-            
-    'Update array size
-    If particle_group_index = particle_group_last Then
-
-        Do Until particle_group_list(particle_group_last).active
-            particle_group_last = particle_group_last - 1
-
-            If particle_group_last = 0 Then
-                particle_group_count = 0
-                Exit Sub
-
-            End If
-
-        Loop
-        ReDim Preserve particle_group_list(1 To particle_group_last)
-
-    End If
-
-    particle_group_count = particle_group_count - 1
-
-End Sub
-
-Public Function Map_Particle_Group_Get(ByVal map_x As Integer, _
-                                       ByVal map_y As Integer) As Long
-
-    If InMapBounds(map_x, map_y) Then
-        Map_Particle_Group_Get = MapData(map_x, map_y).particle_group
-    Else
-        Map_Particle_Group_Get = 0
-
-    End If
-
-End Function
-

@@ -1168,7 +1168,7 @@ Private Sub Command4_Click()
             Call FileManager.ChangeValue(Val(LoopC), "move_y2", Val(.move_y2))
             Call FileManager.ChangeValue(Val(LoopC), "Radio", Val(.Radio))
             Call FileManager.ChangeValue(Val(LoopC), "life_counter", Val(.life_counter))
-            Call FileManager.ChangeValue(Val(LoopC), "Speed", Str(.speed))
+            Call FileManager.ChangeValue(Val(LoopC), "Speed", Str$(.speed))
     
             Call FileManager.ChangeValue(Val(LoopC), "resize", CInt(.grh_resize))
             Call FileManager.ChangeValue(Val(LoopC), "rx", .grh_resizex)
@@ -2186,7 +2186,7 @@ Private Sub speed_Change()
     If LenB(temp) Then
     
         With speed
-            .Text = temp & "." & Right(.Text, Len(.Text) - Len(temp) - 1)
+            .Text = temp & "." & Right$(.Text, Len(.Text) - Len(temp) - 1)
             .SelStart = Len(.Text)
             .SelLength = 0
         End With

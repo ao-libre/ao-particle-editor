@@ -36,8 +36,6 @@ Private TexList(HASH_TABLE_SIZE - 1) As HashNode
 Private mD3D                         As D3DX8
 Private device                       As Direct3DDevice8
 
-Private mCantidadGraficos            As Integer
-
 Private maxBytesToUse                As Long
 Private mFreeMemoryBytes             As Long
 
@@ -111,21 +109,18 @@ End Function
 'WWWW.RINCONDELAO.COM.AR
 
 Public Function Init(ByRef D3D8 As D3DX8, _
-                     ByRef d3d_device As Direct3DDevice8, _
-                     ByVal MaxMemory As Long) As Boolean
+                     ByRef d3d_device As Direct3DDevice8) As Boolean
     '**************************************************************
     'Author: Juan Martín Sotuyo Dodero
     'Last Modify Date: 5/04/2005
     '
     '**************************************************************
-    mCantidadGraficos = 0
     
     'Seteamos el objeto
     Set mD3D = D3D8
     Set device = d3d_device
     mFreeMemoryBytes = 0
-    maxBytesToUse = MaxMemory
-    
+
     Init = True
 
 End Function
@@ -158,7 +153,7 @@ Private Function CrearGrafico(ByVal Archivo As Integer, _
             'Ultimo acceso
             .UltimoAcceso = GetTickCount
     
-            Set .texture = mD3D.CreateTextureFromFileEx(device, App.Path & "\GRAFICOS\" & LTrim(Str(Archivo)) & ".bmp", D3DX_DEFAULT, D3DX_DEFAULT, 3, 0, D3DFMT_A8R8G8B8, D3DPOOL_MANAGED, D3DX_FILTER_NONE, D3DX_FILTER_NONE, &HFF000000, texture_info, ByVal 0)
+            Set .texture = mD3D.CreateTextureFromFileEx(device, App.Path & "\GRAFICOS\" & LTrim$(Str$(Archivo)) & ".bmp", D3DX_DEFAULT, D3DX_DEFAULT, 3, 0, D3DFMT_A8R8G8B8, D3DPOOL_MANAGED, D3DX_FILTER_NONE, D3DX_FILTER_NONE, &HFF000000, texture_info, ByVal 0)
                 
             .texture.GetLevelDesc 0, surface_desc
             .texture_width = texture_info.Width

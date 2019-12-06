@@ -3,7 +3,7 @@ Option Explicit
 
 Public indexs As Integer
 
-'drag&drop cosas
+'Drag & Drop cosas
 Public Declare Function ReleaseCapture Lib "user32" () As Long
 
 Public Declare Function SendMessage _
@@ -22,17 +22,11 @@ Public SurfaceDB  As clsTexManager
 
 Public FileManager As clsIniManager
 
-Public Tips()                                            As String * 255
-
-Public Actual       As Byte
-
 'RGB Type
 Public Type RGB
-
     r As Long
     g As Long
     B As Long
-
 End Type
 
 'Control
