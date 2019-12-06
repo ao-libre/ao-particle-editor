@@ -1,8 +1,6 @@
 Attribute VB_Name = "Mod_General"
 Option Explicit
 
-Private Const CANT_GRH_INDEX As Long = 40000
-
 Public Sub LoadGrhData()
 
     On Error GoTo ErrorHandler
@@ -364,11 +362,3 @@ Public Sub HookSurfaceHwnd(pic As Form)
     Call ReleaseCapture
     Call SendMessage(pic.hWnd, WM_NCLBUTTONDOWN, HTCAPTION, 0&)
 End Sub
-
-Private Function Grh_Check(ByVal grh_index As Long) As Boolean
-
-    If grh_index > 0 And grh_index <= CANT_GRH_INDEX Then
-        Grh_Check = GrhData(grh_index).NumFrames
-    End If
-
-End Function

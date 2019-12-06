@@ -59,49 +59,15 @@ Public Type Grh
 
 End Type
 
-'Lista de cuerpos
-Public Type BodyData
-
-    Walk(E_Heading.NORTH To E_Heading.WEST) As Grh
-    HeadOffset As Position
-
-End Type
-
-'Lista de cabezas
-Public Type HeadData
-
-    Head(E_Heading.NORTH To E_Heading.WEST) As Grh
-
-End Type
-
-'Lista de las animaciones de las armas
-Type WeaponAnimData
-
-    WeaponWalk(E_Heading.NORTH To E_Heading.WEST) As Grh
-
-End Type
-
-'Lista de las animaciones de los escudos
-Type ShieldAnimData
-
-    ShieldWalk(E_Heading.NORTH To E_Heading.WEST) As Grh
-
-End Type
-
 'Apariencia del personaje
 Public Type Char
 
     active As Byte
-    Heading As E_Heading
     Pos As Position
     
     iHead As Integer
     iBody As Integer
-    Body As BodyData
-    Head As HeadData
-    Casco As HeadData
-    Arma As WeaponAnimData
-    Escudo As ShieldAnimData
+    
     UsandoArma As Boolean
     
     fX As Grh
@@ -224,20 +190,6 @@ Public GrhData()               As GrhData 'Guarda todos los grh
 Public MapData()               As MapBlock ' Mapa
 Public charlist(1 To 10000)    As Char
 
-
-Private Declare Function StretchBlt _
-                Lib "gdi32" (ByVal hDestDC As Long, _
-                             ByVal x As Long, _
-                             ByVal Y As Long, _
-                             ByVal nWidth As Long, _
-                             ByVal nHeight As Long, _
-                             ByVal hSrcDC As Long, _
-                             ByVal xSrc As Long, _
-                             ByVal ySrc As Long, _
-                             ByVal nSrcWidth As Long, _
-                             ByVal nSrcHeight As Long, _
-                             ByVal dwRop As Long) As Long
-
 Private Declare Function SetPixel _
                 Lib "gdi32" (ByVal hdc As Long, _
                              ByVal x As Long, _
@@ -309,33 +261,6 @@ Function InMapBounds(ByVal x As Integer, ByVal Y As Integer) As Boolean
     End If
     
     InMapBounds = True
-
-End Function
-
-Private Function GetElapsedTime() As Single
-
-    '**************************************************************
-    'Author: Aaron Perkins
-    'Last Modify Date: 10/07/2002
-    'Gets the time that past since the last call
-    '**************************************************************
-    Dim start_time    As Currency
-    Static end_time   As Currency
-    Static timer_freq As Currency
-
-    'Get the timer frequency
-    If timer_freq = 0 Then
-        Call QueryPerformanceFrequency(timer_freq)
-    End If
-    
-    'Get current time
-    Call QueryPerformanceCounter(start_time)
-    
-    'Calculate elapsed time
-    GetElapsedTime = (start_time - end_time) / timer_freq * 1000
-    
-    'Get next end time
-    Call QueryPerformanceCounter(end_time)
 
 End Function
 

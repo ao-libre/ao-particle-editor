@@ -1,8 +1,7 @@
 Attribute VB_Name = "Mod_Declaraciones"
-
-Public indexs
-
 Option Explicit
+
+Public indexs As Integer
 
 Public font_list() As D3DXFont
 Public mode        As Boolean
@@ -20,7 +19,6 @@ Public Declare Function SendMessage _
 
 Public Const HTCAPTION = 2
 Public Const WM_NCLBUTTONDOWN = &HA1
-Public Const RGN_OR = 2
 
 Public DataChanged As Boolean
 
@@ -38,48 +36,11 @@ Public SurfaceDB  As clsTexManager
 
 Public FileManager As clsIniManager
 
-Public Type tColor
-    r As Byte
-    g As Byte
-    B As Byte
-End Type
-
-Public RainBufferIndex   As Long
-
-Public FogataBufferIndex As Long
-
-Public Const bCabeza = 1
-
-Public Const bPiernaIzquierda = 2
-
-Public Const bPiernaDerecha = 3
-
-Public Const bBrazoDerecho = 4
-
-Public Const bBrazoIzquierdo = 5
-
-Public Const bTorso = 6
-
-'Timers de GetTickCount
-Public Const tAt = 2000
-
-Public Const tUs = 600
-
-Public Const PrimerBodyBarco = 84
-
-Public Const UltimoBodyBarco = 87
-
 Public NumEscudosAnims            As Integer
 
 Public ArmasHerrero(0 To 100)     As Integer
-
 Public ArmadurasHerrero(0 To 100) As Integer
-
 Public ObjCarpintero(0 To 100)    As Integer
-
-Public Versiones(1 To 7)          As Integer
-
-Public UsaMacro                   As Boolean
 
 Public CnTd                       As Byte
 
@@ -93,35 +54,7 @@ Public UserBancoInventory(1 To MAX_BANCOINVENTORY_SLOTS) As Inventory
 
 Public Tips()                                            As String * 255
 
-Public Const LoopAdEternum = 999
-
-'Direcciones
-Public Enum E_Heading
-
-    NORTH = 1
-    EAST = 2
-    SOUTH = 3
-    WEST = 4
-
-End Enum
-
-'Objetos
-Public Const MAX_INVENTORY_OBJS = 10000
-
-Public Const MAX_INVENTORY_SLOTS = 20
-
-Public Const MAX_NPC_INVENTORY_SLOTS = 50
-
-Public Const MAXHECHI = 35
-
 Public Actual       As Byte
-
-'Particle Groups
-Public TotalStreams As Integer
-
-Public StreamData() As Stream
-
-Public Particula()  As Stream
 
 'RGB Type
 Public Type RGB
@@ -131,85 +64,6 @@ Public Type RGB
     B As Long
 
 End Type
-
-Public Type Stream
-
-    Name As String
-    NumOfParticles As Long
-    NumGrhs As Long
-    id As Long
-    x1 As Long
-    y1 As Long
-    x2 As Long
-    y2 As Long
-    angle As Long
-    vecx1 As Long
-    vecx2 As Long
-    vecy1 As Long
-    vecy2 As Long
-    life1 As Long
-    life2 As Long
-    friction As Long
-    spin As Byte
-    spin_speedL As Single
-    spin_speedH As Single
-    AlphaBlend As Byte
-    gravity As Byte
-    grav_strength As Long
-    bounce_strength As Long
-    XMove As Byte
-    YMove As Byte
-    move_x1 As Long
-    move_x2 As Long
-    move_y1 As Long
-    move_y2 As Long
-    grh_list() As Long
-    colortint(0 To 3) As RGB
-    
-    speed As Single
-    life_counter As Long
-    
-    grh_resize As Boolean
-    grh_resizex As Integer
-    grh_resizey As Integer
-    
-    Radio As Integer
-
-End Type
-
-Public Const MAXSKILLPOINTS = 100
-
-Public Const FLAGORO = 777
-
-Public Const FOgata = 1521
-
-Public Enum Skills
-
-    Suerte = 1
-    Magia = 2
-    Robar = 3
-    Tacticas = 4
-    Armas = 5
-    Meditar = 6
-    Apuñalar = 7
-    Ocultarse = 8
-    Supervivencia = 9
-    Talar = 10
-    Comerciar = 11
-    Defensa = 12
-    Pesca = 13
-    Mineria = 14
-    Carpinteria = 15
-    Herreria = 16
-    Liderazgo = 17 ' NOTA: Solia decir "Curacion"
-    Domar = 18
-    Proyectiles = 19
-    Wresterling = 20
-    Navegacion = 21
-
-End Enum
-
-Public Const FundirMetal As Integer = 88
 
 '
 ' Mensajes
@@ -232,30 +86,6 @@ Type Inventory
     Def As Integer
     MaxHit As Integer
     MinHit As Integer
-
-End Type
-
-Type tReputacion 'Fama del usuario
-
-    NobleRep As Long
-    BurguesRep As Long
-    PlebeRep As Long
-    LadronesRep As Long
-    BandidoRep As Long
-    AsesinoRep As Long
-    
-    Promedio As Long
-
-End Type
-
-Type tEstadisticasUsu
-
-    CiudadanosMatados As Long
-    CriminalesMatados As Long
-    UsuariosMatados As Long
-    NpcsMatados As Long
-    Clase As String
-    PenaCarcel As Long
 
 End Type
 
@@ -284,38 +114,6 @@ Public logged             As Boolean
 
 Public NoPuedeUsar        As Boolean
 
-'Barrin 30/9/03
-Public UserPuedeRefrescar As Boolean
-
-Public UsingSkill         As Integer
-
-Public MD5HushYo          As String * 16
-
-Public Enum E_MODO
-
-    Normal = 1
-    BorrarPj = 2
-    CrearNuevoPj = 3
-    Dados = 4
-    RecuperarPass = 5
-
-End Enum
-
-Public EstadoLogin As E_MODO
-   
-Public Enum FxMeditar
-
-    '    FXMEDITARCHICO = 4
-    '    FXMEDITARMEDIANO = 5
-    '    FXMEDITARGRANDE = 6
-    '    FXMEDITARXGRANDE = 16
-    CHICO = 4
-    MEDIANO = 5
-    GRANDE = 6
-    XGRANDE = 16
-
-End Enum
-
 'Server stuff
 Public RequestPosTimer   As Integer 'Used in main loop
 
@@ -330,11 +128,6 @@ Public Connected         As Boolean 'True when connected to server
 Public DownloadingMap    As Boolean 'Currently downloading a map from server
 
 Public UserMap           As Integer
-
-'String contants
-Public Const ENDC        As String * 1 = vbNullChar    'Endline character for talking with server
-
-Public Const ENDL        As String * 2 = vbCrLf        'Holds the Endline character for textboxes
 
 'Control
 Public prgRun            As Boolean 'When true the program ends
@@ -366,35 +159,7 @@ Public Declare Function getprivateprofilestring _
                                                  ByVal nsize As Long, _
                                                  ByVal lpfilename As String) As Long
 
-'Teclado
-Public Declare Function GetKeyState Lib "user32" (ByVal nVirtKey As Long) As Integer
-
-Public Declare Function GetAsyncKeyState Lib "user32" (ByVal nVirtKey As Long) As Integer
-
 Public Declare Sub Sleep Lib "kernel32" (ByVal dwMilliseconds As Long)
-
-'Lista de cabezas
-Public Type tIndiceCabeza
-
-    Head(1 To 4) As Integer
-
-End Type
-
-Public Type tIndiceCuerpo
-
-    Body(1 To 4) As Integer
-    HeadOffsetX As Integer
-    HeadOffsetY As Integer
-
-End Type
-
-Public Type tIndiceFx
-
-    Animacion As Integer
-    OffsetX As Integer
-    OffsetY As Integer
-
-End Type
 
 'Old fashion BitBlt function
 Public Declare Function BitBlt _
@@ -415,20 +180,6 @@ Public Declare Function SelectObject _
 Public Declare Function CreateCompatibleDC Lib "gdi32" (ByVal hdc As Long) As Long
 
 Public Declare Function DeleteDC Lib "gdi32" (ByVal hdc As Long) As Long
-
-'Added by Juan Martín Sotuyo Dodero
-Public Declare Function StretchBlt _
-               Lib "gdi32" (ByVal hDestDC As Long, _
-                            ByVal x As Long, _
-                            ByVal Y As Long, _
-                            ByVal nWidth As Long, _
-                            ByVal nHeight As Long, _
-                            ByVal hSrcDC As Long, _
-                            ByVal xSrc As Long, _
-                            ByVal ySrc As Long, _
-                            ByVal nSrcWidth As Long, _
-                            ByVal nSrcHeight As Long, _
-                            ByVal dwRop As Long) As Long
 
 Public Declare Function DeleteObject Lib "gdi32" (ByVal hObject As Long) As Long
 

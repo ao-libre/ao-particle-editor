@@ -17,9 +17,6 @@ Option Explicit
 
 Const HASH_TABLE_SIZE           As Long = 337
 
-Private Const BYTES_PER_MB      As Long = 1048576                    '1Mb = 1024 Kb = 1024 * 1024 bytes = 1048576 bytes
-Private Const MIN_MEMORY_TO_USE As Long = 16 * BYTES_PER_MB          '4 Mb
-
 Private Type SURFACE_ENTRY_DYN
     FileName As Integer
     UltimoAcceso As Long
@@ -129,7 +126,7 @@ Public Function Init(ByRef D3D8 As D3DX8, _
     Set mD3D = D3D8
     Set device = d3d_device
     mFreeMemoryBytes = 0
-    maxBytesToUse = MIN_MEMORY_TO_USE
+    maxBytesToUse = MaxMemory
     
     Init = True
 

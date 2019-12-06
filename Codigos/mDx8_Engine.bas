@@ -8,57 +8,15 @@ Private Type decoration
     subtile_pos As Byte
 End Type
 
-Private Type Map_Tile
-    Grh(1 To 3) As Grh
-    decoration(1 To 5) As decoration
-    decoration_count As Byte
-    Blocked As Boolean
-    particle_group_index As Long
-    char_index As Long
-    light_base_value(0 To 3) As Long
-    light_value(0 To 3) As Long
-   
-    exit_index As Long
-    npc_index As Long
-    item_index As Long
-   
-    Trigger As Byte
-End Type
- 
-Private Type Map
-    map_grid() As Map_Tile
-    map_x_max As Long
-    map_x_min As Long
-    map_y_max As Long
-    map_y_min As Long
-    map_description As String
-    
-    'Added by Juan Martín Sotuyo Dodero
-    base_light_color As Long
-End Type
-
 Dim base_tile_size As Integer
 
 Public bRunning           As Boolean
 
 Private Const FVF = D3DFVF_XYZRHW Or D3DFVF_TEX1 Or D3DFVF_DIFFUSE Or D3DFVF_SPECULAR
-Private Const FVF2 = D3DFVF_XYZRHW Or D3DFVF_DIFFUSE Or D3DFVF_SPECULAR Or D3DFVF_TEX2
 
 Dim font_count      As Long
 Dim font_last       As Long
 Private font_list() As D3DXFont
-
-Public Enum FontAlignment
-    fa_center = DT_CENTER
-    fa_top = DT_TOP
-    fa_left = DT_LEFT
-    fa_topleft = DT_TOP Or DT_LEFT
-    fa_bottomleft = DT_BOTTOM Or DT_LEFT
-    fa_bottom = DT_BOTTOM
-    fa_right = DT_RIGHT
-    fa_bottomright = DT_BOTTOM Or DT_RIGHT
-    fa_topright = DT_TOP Or DT_RIGHT
-End Enum
 
 Dim texture      As Direct3DTexture8
 Dim TransTexture As Direct3DTexture8
@@ -110,24 +68,6 @@ Private WindowTileHeight       As Integer
 Private HalfWindowTileWidth    As Integer
 Private HalfWindowTileHeight   As Integer
 
-Private Const GrhFogata        As Integer = 1521
-
-Private Type Light
-    RGBcolor As D3DCOLORVALUE
-    active As Boolean 'Do we ignore this light?
-    id As Long
-    map_x As Integer 'Coordinates
-    map_y As Integer
-    Color As Long 'Start colour
-    range As Byte
-End Type
-
-'Light list
-Dim light_list()  As Light
-Dim light_count   As Long
-Dim light_last    As Long
-Private NumLights As Byte
-
 Dim dimeTex             As Long
 
 Dim tex                 As Direct3DTexture8
@@ -139,8 +79,6 @@ Dim bump_map_texture    As Direct3DTexture8
 Dim bump_map_texture_ex As Direct3DTexture8
 Dim bump_map_supported  As Boolean
 Dim bump_map_powa       As Boolean
-
-Dim map_current         As Map
 
 Dim char_last           As Long
 Dim char_list()         As Char
@@ -198,159 +136,6 @@ Private Function GetElapsedTime() As Single
 
 End Function
 
-Public Sub Text_Render(ByVal font As D3DXFont, _
-                       ByVal Text As String, _
-                       ByVal Top As Long, _
-                       ByVal Left As Long, _
-                       ByVal Width As Long, _
-                       ByVal Height As Long, _
-                       ByVal Color As Long, _
-                       ByVal format As Long, _
-                       Optional ByVal shadow As Boolean = False, _
-                       Optional ByVal Nombre As Byte, _
-                       Optional ByVal Rojo As Byte, _
-                       Optional ByVal Verde As Byte, _
-                       Optional ByVal Azul As Byte)
-
-    '*****************************************************
-    '****** Coded by Menduz (lord.yo.wo@gmail.com) *******
-    '*****************************************************
-    Dim TextRect   As RECT
-
-    Dim ShadowRect As RECT
-    
-    TextRect.Top = Top
-    TextRect.Left = Left
-    TextRect.bottom = Top + Height
-    TextRect.Right = Left + Width
-        
-    If shadow Then
-        ShadowRect.Top = Top - 1
-        ShadowRect.Left = Left - 2
-        ShadowRect.bottom = (Top + Height) - 1
-        ShadowRect.Right = (Left + Width) - 2
-        D3DX.DrawText font, Color, Text, TextRect, format
-
-    End If
-
-    D3DX.DrawText font, Color, Text, TextRect, format
-
-End Sub
-
-Public Sub Text_Render_Inventario(ByVal font As D3DXFont, _
-                                  ByVal Text As String, _
-                                  ByVal Top As Long, _
-                                  ByVal Left As Long, _
-                                  ByVal Width As Long, _
-                                  ByVal Height As Long, _
-                                  ByVal Color As Long, _
-                                  ByVal format As Long, _
-                                  Optional ByVal shadow As Boolean = False)
-
-    '*****************************************************
-    '****** Coded by Menduz (lord.yo.wo@gmail.com) *******
-    '*****************************************************
-    Dim TextRect   As RECT
-
-    Dim ShadowRect As RECT
-    
-    TextRect.Top = Top
-    TextRect.Left = Left
-    TextRect.bottom = Top + Height
-    TextRect.Right = Left + Width
-        
-    If shadow Then
-        ShadowRect.Top = Top - 1
-        ShadowRect.Left = Left - 2
-        ShadowRect.bottom = (Top + Height) - 1
-        ShadowRect.Right = (Left + Width) - 2
-        'D3DX.DrawText font, &HFF000000, Text, ShadowRect, format
-        ' D3DX.DrawText font, D3DColorXRGB(255, 255, 255), Text, ShadowRect, format
-        D3DX.DrawText font, Color, Text, TextRect, format
-
-    End If
-    
-    D3DX.DrawText font, Color, Text, TextRect, format
-    
-End Sub
-
-Public Sub Text_Render_ext(ByVal Text As String, _
-                           ByVal Top As Long, _
-                           ByVal Left As Long, _
-                           ByVal Width As Long, _
-                           ByVal Height As Long, _
-                           ByVal Color As Long, _
-                           Optional ByVal shadow As Boolean = False, _
-                           Optional ByVal center As Boolean = False)
-
-    If center = True Then
-        '  Call Text_Render_Inventario(font_list(1), Text, Top, Left, width, height, color, fa_center, shadow)
-    Else
-
-        ' Call Text_Render_Inventario(font_list(1), Text, Top, Left, width, height, color, DT_TOP Or DT_LEFT, shadow)
-    End If
-
-End Sub
-
-Private Sub Font_Make(ByVal font_index As Long, _
-                      ByVal style As String, _
-                      ByVal Bold As Boolean, _
-                      ByVal Italic As Boolean, _
-                      ByVal size As Long)
-
-    If font_index > font_last Then
-        font_last = font_index
-
-        '    ReDim Preserve font_list(1 To font_last)
-    End If
-
-    font_count = font_count + 1
-    
-    Dim font_desc As IFont
-
-    Dim fnt       As New StdFont
-
-    fnt.Name = style
-    fnt.size = size
-    fnt.Bold = Bold
-    fnt.Italic = Italic
-    
-    Set font_desc = fnt
-
-    ' Set font_list(font_index) = D3DX.CreateFont(D3DDevice, font_desc.hFont)
-End Sub
-
-Public Function Font_Create(ByVal style As String, _
-                            ByVal size As Long, _
-                            ByVal Bold As Boolean, _
-                            ByVal Italic As Boolean) As Long
-
-    On Error GoTo ErrorHandler:
-
-    Font_Create = Font_Next_Open
-    Font_Make Font_Create, style, Bold, Italic, size
-ErrorHandler:
-    Font_Create = 0
-
-End Function
-
-Private Function Font_Next_Open() As Long
-    Font_Next_Open = font_last + 1
-
-End Function
-
-Private Function Font_Check(ByVal font_index As Long) As Boolean
-
-    '*****************************************************
-    '****** Coded by Menduz (lord.yo.wo@gmail.com) *******
-    '*****************************************************
-    If font_index > 0 And font_index <= font_last Then
-        Font_Check = True
-
-    End If
-
-End Function
-
 Function MakeVector(ByVal x As Single, ByVal Y As Single, ByVal Z As Single) As D3DVECTOR
     '*****************************************************
     '****** Coded by Menduz (lord.yo.wo@gmail.com) *******
@@ -405,13 +190,11 @@ Public Sub Engine_Init()
         Else
             bump_map_supported = False
             DispMode.format = DispModeBK.format
-
         End If
 
     Else
         bump_map_supported = False
         DispMode.format = DispModeBK.format
-
     End If
 
     Set D3DDevice = D3D.CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, frmMain.renderer.hWnd, D3DCREATE_SOFTWARE_VERTEXPROCESSING, D3DWindow)
@@ -483,81 +266,6 @@ Public Sub Engine_ActFPS()
         FramesPerSecCounter = 0
         lFrameTimer = GetTickCount
     End If
-
-End Sub
-
-Public Sub Draw_GrhIndex(ByVal grh_index As Integer, _
-                         ByVal x As Integer, _
-                         ByVal Y As Integer)
-
-    If grh_index <= 0 Then Exit Sub
-
-    Dim rgb_list(3) As Long
-    
-    rgb_list(0) = D3DColorXRGB(255, 255, 255)
-    rgb_list(1) = D3DColorXRGB(255, 255, 255)
-    rgb_list(2) = D3DColorXRGB(255, 255, 255)
-    rgb_list(3) = D3DColorXRGB(255, 255, 255)
-    
-    Device_Box_Textured_Render grh_index, x, Y, GrhData(grh_index).pixelWidth, GrhData(grh_index).pixelHeight, rgb_list, GrhData(grh_index).SX, GrhData(grh_index).SY
-
-End Sub
-
-Private Sub Draw_Grh(ByRef Grh As Grh, _
-                     ByVal x As Integer, _
-                     ByVal Y As Integer, _
-                     ByVal center As Byte, _
-                     ByVal Animate As Byte, _
-                     Optional ByVal alpha As Boolean, _
-                     Optional ByVal map_x As Byte = 1, _
-                     Optional ByVal map_y As Byte = 1, _
-                     Optional ByVal angle As Single)
-
-    Dim CurrentGrhIndex As Integer
-
-    If Grh.grhindex = 0 Then Exit Sub
-    If Animate Then
-        If Grh.Started = 1 Then
-            Grh.FrameCounter = Grh.FrameCounter + (timerElapsedTime * GrhData(Grh.grhindex).NumFrames / Grh.speed)
-
-            If Grh.FrameCounter > GrhData(Grh.grhindex).NumFrames Then
-                Grh.FrameCounter = (Grh.FrameCounter Mod GrhData(Grh.grhindex).NumFrames) + 1
-                
-                If Grh.Loops <> -1 Then
-                    If Grh.Loops > 0 Then
-                        Grh.Loops = Grh.Loops - 1
-                    Else
-                        Grh.Started = 0
-
-                    End If
-
-                End If
-
-            End If
-
-        End If
-
-    End If
-    
-    'Figure out what frame to draw (always 1 if not animated)
-    CurrentGrhIndex = GrhData(Grh.grhindex).Frames(Grh.FrameCounter)
-
-    'Center Grh over X,Y pos
-    If center Then
-        If GrhData(CurrentGrhIndex).TileWidth <> 1 Then
-            x = x - Int(GrhData(CurrentGrhIndex).TileWidth * (32 \ 2)) + 32 \ 2
-
-        End If
-
-        If GrhData(Grh.grhindex).TileHeight <> 1 Then
-            Y = Y - Int(GrhData(CurrentGrhIndex).TileHeight * 32) + 32
-
-        End If
-
-    End If
-
-    Device_Box_Textured_Render CurrentGrhIndex, x, Y, GrhData(CurrentGrhIndex).pixelWidth, GrhData(CurrentGrhIndex).pixelHeight, MapData(map_x, map_y).light_value, GrhData(CurrentGrhIndex).SX, GrhData(CurrentGrhIndex).SY, alpha, angle
-    'exits:
 
 End Sub
 
@@ -1069,7 +777,6 @@ Private Sub Grh_Render(ByRef Grh As Grh, _
     On Error Resume Next
 
     Dim tile_width  As Integer
-
     Dim tile_height As Integer
 
     Dim grh_index   As Long

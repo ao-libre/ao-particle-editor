@@ -25,28 +25,7 @@ Public Type TLVERTEX
     tv As Single
 End Type
 
-Public Type TLVERTEX2
-    x As Single
-    Y As Single
-    Z As Single
-    rhw As Single
-    Color As Long
-    Specular As Long
-    tu1 As Single
-    tv1 As Single
-    tu2 As Single
-    tv2 As Single
-End Type
-
 Public Const PI   As Single = 3.14159265358979
-
-'To get free bytes in drive
-Private Declare Function GetDiskFreeSpace _
-                Lib "kernel32" _
-                Alias "GetDiskFreeSpaceExA" (ByVal lpRootPathName As String, _
-                                             FreeBytesToCaller As Currency, _
-                                             BytesTotal As Currency, _
-                                             FreeBytesTotal As Currency) As Long
 
 'To get free bytes in RAM
 Private pUdtMemStatus As MEMORYSTATUS
@@ -60,42 +39,6 @@ Private Type MEMORYSTATUS
     dwAvailPageFile As Long
     dwTotalVirtual As Long
     dwAvailVirtual As Long
-End Type
-
-Private Type Stream
-    Name As String
-    NumOfParticles As Long
-    NumGrhs As Long
-    id As Long
-    x1 As Long
-    y1 As Long
-    x2 As Long
-    y2 As Long
-    angle As Long
-    vecx1 As Long
-    vecx2 As Long
-    vecy1 As Long
-    vecy2 As Long
-    life1 As Long
-    life2 As Long
-    friction As Long
-    spin As Byte
-    spin_speedL As Single
-    spin_speedH As Single
-    AlphaBlend As Byte
-    gravity As Byte
-    grav_strength As Long
-    bounce_strength As Long
-    XMove As Byte
-    YMove As Byte
-    move_x1 As Long
-    move_x2 As Long
-    move_y1 As Long
-    move_y2 As Long
-    grh_list() As Long
-    colortint(0 To 3) As RGB
-    speed As Single
-    life_counter As Long
 End Type
 
 Private Declare Sub GlobalMemoryStatus Lib "kernel32" (lpBuffer As MEMORYSTATUS)
