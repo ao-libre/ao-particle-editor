@@ -18,12 +18,6 @@ Public Const WM_NCLBUTTONDOWN = &HA1
 
 Public DataChanged As Boolean
 
-Public Type tCabecera 'Cabecera de los con
-    desc As String * 255
-    CRC As Long
-    MagicWord As Long
-End Type
-
 Public SurfaceDB  As clsTexManager
 
 Public FileManager As clsIniManager
@@ -38,30 +32,6 @@ Public Type RGB
     r As Long
     g As Long
     B As Long
-
-End Type
-
-'
-' Mensajes
-'
-' MENSAJE_*  --> Mensajes de texto que se muestran en el cuadro de texto
-'
-
-'Inventario
-Type Inventory
-
-    OBJIndex As Integer
-    Name As String
-    grhindex As Integer
-    '[Alejo]: tipo de datos ahora es Long
-    Amount As Long
-    '[/Alejo]
-    Equipped As Byte
-    Valor As Long
-    OBJType As Integer
-    Def As Integer
-    MaxHit As Integer
-    MinHit As Integer
 
 End Type
 
@@ -92,26 +62,6 @@ Public Declare Function getprivateprofilestring _
                                                  ByVal lpfilename As String) As Long
 
 Public Declare Sub Sleep Lib "kernel32" (ByVal dwMilliseconds As Long)
-
-'Old fashion BitBlt function
-Public Declare Function BitBlt _
-               Lib "gdi32" (ByVal hDestDC As Long, _
-                            ByVal x As Long, _
-                            ByVal Y As Long, _
-                            ByVal nWidth As Long, _
-                            ByVal nHeight As Long, _
-                            ByVal hSrcDC As Long, _
-                            ByVal xSrc As Long, _
-                            ByVal ySrc As Long, _
-                            ByVal dwRop As Long) As Long
-
-Public Declare Function SelectObject _
-               Lib "gdi32" (ByVal hdc As Long, _
-                            ByVal hObject As Long) As Long
-
-Public Declare Function CreateCompatibleDC Lib "gdi32" (ByVal hdc As Long) As Long
-
-Public Declare Function DeleteDC Lib "gdi32" (ByVal hdc As Long) As Long
 
 Public Declare Function DeleteObject Lib "gdi32" (ByVal hObject As Long) As Long
 
