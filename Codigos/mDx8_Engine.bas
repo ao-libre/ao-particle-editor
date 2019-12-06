@@ -3,15 +3,12 @@ Attribute VB_Name = "mDx8_Engine"
 Option Explicit
  
 Private Type decoration
-
     Grh As Grh
     Render_On_Top As Boolean
     subtile_pos As Byte
-
 End Type
 
 Private Type Map_Tile
-
     Grh(1 To 3) As Grh
     decoration(1 To 5) As decoration
     decoration_count As Byte
@@ -26,193 +23,32 @@ Private Type Map_Tile
     item_index As Long
    
     Trigger As Byte
-
 End Type
  
 Private Type Map
-
     map_grid() As Map_Tile
     map_x_max As Long
     map_x_min As Long
     map_y_max As Long
     map_y_min As Long
     map_description As String
+    
     'Added by Juan Martín Sotuyo Dodero
     base_light_color As Long
-
 End Type
- 
-Private Type Particle
 
-    friction As Single
-    x As Single
-    Y As Single
-    vector_x As Single
-    vector_y As Single
-    angle As Single
-    Grh As Grh
-    alive_counter As Long
-    x1 As Integer
-    x2 As Integer
-    y1 As Integer
-    y2 As Integer
-    vecx1 As Integer
-    vecx2 As Integer
-    vecy1 As Integer
-    vecy2 As Integer
-    life1 As Long
-    life2 As Long
-    fric As Integer
-    spin_speedL As Single
-    spin_speedH As Single
-    gravity As Boolean
-    grav_strength As Long
-    bounce_strength As Long
-    spin As Boolean
-    XMove As Boolean
-    YMove As Boolean
-    move_x1 As Integer
-    move_x2 As Integer
-    move_y1 As Integer
-    move_y2 As Integer
-    Radio As Integer
-    rgb_list(0 To 3) As Long
-    grh_resize As Boolean
-    grh_resizex As Integer
-    grh_resizey As Integer
-
-End Type
- 
 Dim base_tile_size As Integer
- 
-Private Type Stream
-
-    Name As String
-    NumOfParticles As Long
-    NumGrhs As Long
-    id As Long
-    x1 As Long
-    y1 As Long
-    x2 As Long
-    y2 As Long
-    angle As Long
-    vecx1 As Long
-    vecx2 As Long
-    vecy1 As Long
-    vecy2 As Long
-    life1 As Long
-    life2 As Long
-    friction As Long
-    spin As Byte
-    spin_speedL As Single
-    spin_speedH As Single
-    AlphaBlend As Byte
-    gravity As Byte
-    grav_strength As Long
-    bounce_strength As Long
-    XMove As Byte
-    YMove As Byte
-    move_x1 As Long
-    move_x2 As Long
-    move_y1 As Long
-    move_y2 As Long
-    grh_list() As Long
-    colortint(0 To 3) As RGB
-   
-    speed As Single
-    life_counter As Long
-
-End Type
- 
-Private Type particle_group
-
-    active As Boolean
-    id As Long
-    map_x As Integer
-    map_y As Integer
-    char_index As Long
-
-    frame_counter As Single
-    frame_speed As Single
-    
-    stream_type As Byte
-
-    particle_stream() As Particle
-    particle_count As Long
-    
-    grh_index_list() As Long
-    grh_index_count As Long
-    
-    alpha_blend As Boolean
-    
-    alive_counter As Long
-    never_die As Boolean
-    
-    live As Long
-    liv1 As Integer
-    liveend As Long
-    
-    x1 As Integer
-    x2 As Integer
-    y1 As Integer
-    y2 As Integer
-    angle As Integer
-    vecx1 As Integer
-    vecx2 As Integer
-    vecy1 As Integer
-    vecy2 As Integer
-    life1 As Long
-    life2 As Long
-    fric As Long
-    spin_speedL As Single
-    spin_speedH As Single
-    gravity As Boolean
-    grav_strength As Long
-    bounce_strength As Long
-    spin As Boolean
-    XMove As Boolean
-    YMove As Boolean
-    move_x1 As Integer
-    move_x2 As Integer
-    move_y1 As Integer
-    move_y2 As Integer
-    rgb_list(0 To 3) As Long
-    
-    'Added by Juan Martín Sotuyo Dodero
-    speed As Single
-    life_counter As Long
-    
-    'Added by David Justus
-    grh_resize As Boolean
-    grh_resizex As Integer
-    grh_resizey As Integer
-    Radio As Integer
-
-End Type
-
-'Particle system
-Dim particle_group_list() As particle_group
-
-Dim particle_group_count  As Long
-
-Dim particle_group_last   As Long
-
-'******Particulas******
 
 Public bRunning           As Boolean
 
 Private Const FVF = D3DFVF_XYZRHW Or D3DFVF_TEX1 Or D3DFVF_DIFFUSE Or D3DFVF_SPECULAR
-
 Private Const FVF2 = D3DFVF_XYZRHW Or D3DFVF_DIFFUSE Or D3DFVF_SPECULAR Or D3DFVF_TEX2
 
 Dim font_count      As Long
-
 Dim font_last       As Long
-
 Private font_list() As D3DXFont
 
 Public Enum FontAlignment
-
     fa_center = DT_CENTER
     fa_top = DT_TOP
     fa_left = DT_LEFT
@@ -222,11 +58,9 @@ Public Enum FontAlignment
     fa_right = DT_RIGHT
     fa_bottomright = DT_BOTTOM Or DT_RIGHT
     fa_topright = DT_TOP Or DT_RIGHT
-
 End Enum
 
 Dim texture      As Direct3DTexture8
-
 Dim TransTexture As Direct3DTexture8
 
 Private Declare Function QueryPerformanceFrequency _
@@ -236,11 +70,8 @@ Private Declare Function QueryPerformanceCounter _
                 Lib "kernel32" (lpPerformanceCount As Currency) As Long
 
 Public FPS                     As Integer
-
 Private FramesPerSecCounter    As Integer
-
 Private timerElapsedTime       As Single
-
 Private timerTicksPerFrame     As Double
 
 Private particletimer          As Single
@@ -248,33 +79,25 @@ Private particletimer          As Single
 Public engineBaseSpeed         As Single
 
 Private lFrameTimer            As Long
-
 Private lFrameLimiter          As Long
 
 Private ScrollPixelsPerFrameX  As Byte
-
 Private ScrollPixelsPerFrameY  As Byte
 
 Private TileBufferPixelOffsetX As Integer
-
 Private TileBufferPixelOffsetY As Integer
 
 Private MainViewTop            As Integer
-
 Private MainViewLeft           As Integer
 
 Private MainDestRect           As RECT
-
 Private MainViewRect           As RECT
-
 Private BackBufferRect         As RECT
 
 Private MainViewWidth          As Integer
-
 Private MainViewHeight         As Integer
 
 Private MouseTileX             As Byte
-
 Private MouseTileY             As Byte
 
 Private iFrameIndex            As Byte  'Frame actual de la LL
@@ -282,17 +105,14 @@ Private iFrameIndex            As Byte  'Frame actual de la LL
 Private llTick                 As Long  'Contador
 
 Private WindowTileWidth        As Integer
-
 Private WindowTileHeight       As Integer
 
 Private HalfWindowTileWidth    As Integer
-
 Private HalfWindowTileHeight   As Integer
 
 Private Const GrhFogata        As Integer = 1521
 
 Private Type Light
-
     RGBcolor As D3DCOLORVALUE
     active As Boolean 'Do we ignore this light?
     id As Long
@@ -300,83 +120,30 @@ Private Type Light
     map_y As Integer
     Color As Long 'Start colour
     range As Byte
-
 End Type
 
 'Light list
 Dim light_list()  As Light
-
 Dim light_count   As Long
-
 Dim light_last    As Long
-
 Private NumLights As Byte
-
-Private Enum PARTICLE_STATUS
-
-    Alive = 0
-    Dead = 1
-
-End Enum
-
-Private Type pa_gro
-
-    PrtData() As Particle
-    PrtVertList() As TLVERTEX
-    Position As D3DVECTOR
-    Light As D3DLIGHT8
-
-    type As Integer
-
-    nParticles As Long
-    ParticleSize As Single
-    gravity As Single
-    XWind As Single
-    ZWind As Single
-    YWind As Single
-    XVariation As Single
-    YVariation As Single
-    ZVariation As Single
-    x As Single
-    Y As Single
-    Z As Single
-    activated As Boolean
-    texture As Integer
-    size As Single
-    life As Integer
-
-End Type
-
-'Dim fxs_list() As New clsFXS
-'Dim fxs_count As Integer
-'Dim fxs_last As Integer
 
 Dim dimeTex             As Long
 
 Dim tex                 As Direct3DTexture8
-
 Dim D3DbackBuffer       As Direct3DSurface8
-
 Dim zTarget             As Direct3DSurface8
-
 Dim stencil             As Direct3DSurface8
-
 Dim superTex            As Direct3DSurface8
-
 Dim bump_map_texture    As Direct3DTexture8
-
 Dim bump_map_texture_ex As Direct3DTexture8
-
 Dim bump_map_supported  As Boolean
-
 Dim bump_map_powa       As Boolean
 
 Dim map_current         As Map
 
 Dim char_last           As Long
-
 Dim char_list()         As Char
-
 Dim char_count          As Long
 
 'Sets a Grh animation to loop indefinitely.

@@ -1,6 +1,114 @@
 Attribute VB_Name = "mDx8_Particulas"
 Option Explicit
 
+Public Type Particle
+    friction As Single
+    x As Single
+    Y As Single
+    vector_x As Single
+    vector_y As Single
+    angle As Single
+    Grh As Grh
+    alive_counter As Long
+    x1 As Integer
+    x2 As Integer
+    y1 As Integer
+    y2 As Integer
+    vecx1 As Integer
+    vecx2 As Integer
+    vecy1 As Integer
+    vecy2 As Integer
+    life1 As Long
+    life2 As Long
+    fric As Integer
+    spin_speedL As Single
+    spin_speedH As Single
+    gravity As Boolean
+    grav_strength As Long
+    bounce_strength As Long
+    spin As Boolean
+    XMove As Boolean
+    YMove As Boolean
+    move_x1 As Integer
+    move_x2 As Integer
+    move_y1 As Integer
+    move_y2 As Integer
+    Radio As Integer
+    rgb_list(0 To 3) As Long
+    grh_resize As Boolean
+    grh_resizex As Integer
+    grh_resizey As Integer
+End Type
+ 
+Public Type particle_group
+    active As Boolean
+    id As Long
+    map_x As Integer
+    map_y As Integer
+    char_index As Long
+
+    frame_counter As Single
+    frame_speed As Single
+    
+    stream_type As Byte
+
+    particle_stream() As Particle
+    particle_count As Long
+    
+    grh_index_list() As Long
+    grh_index_count As Long
+    
+    alpha_blend As Boolean
+    
+    alive_counter As Long
+    never_die As Boolean
+    
+    live As Long
+    liv1 As Integer
+    liveend As Long
+    
+    x1 As Integer
+    x2 As Integer
+    y1 As Integer
+    y2 As Integer
+    angle As Integer
+    vecx1 As Integer
+    vecx2 As Integer
+    vecy1 As Integer
+    vecy2 As Integer
+    life1 As Long
+    life2 As Long
+    fric As Long
+    spin_speedL As Single
+    spin_speedH As Single
+    gravity As Boolean
+    grav_strength As Long
+    bounce_strength As Long
+    spin As Boolean
+    XMove As Boolean
+    YMove As Boolean
+    move_x1 As Integer
+    move_x2 As Integer
+    move_y1 As Integer
+    move_y2 As Integer
+    rgb_list(0 To 3) As Long
+    
+    'Added by Juan Martín Sotuyo Dodero
+    speed As Single
+    life_counter As Long
+    
+    'Added by David Justus
+    grh_resize As Boolean
+    grh_resizex As Integer
+    grh_resizey As Integer
+    Radio As Integer
+End Type
+
+'Particle system
+Public particle_group_list() As particle_group
+Public particle_group_count  As Long
+Public particle_group_last   As Long
+ 
 Public Sub LoadStreamFile(ByVal StreamFile As String)
 
     On Error Resume Next
@@ -79,10 +187,15 @@ Public Sub LoadStreamFile(ByVal StreamFile As String)
             Dim ColorSet As Long
         
             For ColorSet = 1 To 4
+                
                 TempSet = FileManager.GetValue(Val(LoopC), "ColorSet" & ColorSet)
-                .colortint(ColorSet - 1).r = ReadField(1, TempSet, 44)
-                .colortint(ColorSet - 1).g = ReadField(2, TempSet, 44)
-                .colortint(ColorSet - 1).B = ReadField(3, TempSet, 44)
+                
+                With .colortint(ColorSet - 1)
+                    .r = ReadField(1, TempSet, 44)
+                    .g = ReadField(2, TempSet, 44)
+                    .B = ReadField(3, TempSet, 44)
+                End With
+                
             Next ColorSet
         
             'fill stream type combo box

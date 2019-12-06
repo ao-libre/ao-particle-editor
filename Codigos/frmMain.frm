@@ -1082,27 +1082,29 @@ Public CurStreamFile As String
 Private Sub Command4_Click()
 
     Dim LoopC      As Long
-
     Dim StreamFile As String
-
     Dim Bypass     As Boolean
-
-    Dim retval
+    Dim RetVal     As Byte
 
     CurStreamFile = App.Path & "\INIT\Particles.ini"
 
     If FileExists(CurStreamFile, vbNormal) = True Then
-        retval = MsgBox("¡El archivo " & CurStreamFile & " ya existe!" & vbCrLf & "¿Deseas sobreescribirlo?", vbYesNoCancel Or vbQuestion)
-
-        If retval = vbNo Then
-            Bypass = False
-        ElseIf retval = vbCancel Then
-            Exit Sub
-        ElseIf retval = vbYes Then
-            StreamFile = CurStreamFile
-            Bypass = True
-
-        End If
+        
+        RetVal = MsgBox("¡El archivo " & CurStreamFile & " ya existe!" & vbCrLf & "¿Deseas sobreescribirlo?", vbYesNoCancel Or vbQuestion)
+        
+        Select Case RetVal
+        
+            Case vbNo
+                Bypass = False
+            
+            Case vbCancel
+                Exit Sub
+                
+            Case vbYes
+                StreamFile = CurStreamFile
+                Bypass = True
+                
+        End Select
 
     End If
 
@@ -1112,94 +1114,95 @@ Private Sub Command4_Click()
             .Filter = "*.ini (Stream Data Files)|*.ini"
             .ShowSave
             StreamFile = .FileName
-
         End With
     
         If FileExists(StreamFile, vbNormal) = True Then
-            retval = MsgBox("¡El archivo " & StreamFile & " ya existe!" & vbCrLf & "¿Desea sobreescribirlo?", vbYesNo Or vbQuestion)
-
-            If retval = vbNo Then
-                Exit Sub
-
-            End If
-
+            RetVal = MsgBox("¡El archivo " & StreamFile & " ya existe!" & vbCrLf & "¿Desea sobreescribirlo?", vbYesNo Or vbQuestion)
+            If RetVal = vbNo Then Exit Sub
         End If
 
     End If
 
     Dim GrhListing As String
-
-    Dim i          As Long
+    Dim i          As Long, j As Long
+    Set FileManager = New clsIniManager
 
     'Check for existing data file and kill it
     If FileExists(StreamFile, vbNormal) Then Kill StreamFile
 
     'Write particle data to Particles.ini
-    WriteVar StreamFile, "INIT", "Total", Val(TotalStreams)
+    Call FileManager.ChangeValue("INIT", "Total", Val(TotalStreams))
 
     For LoopC = 1 To TotalStreams
-        WriteVar StreamFile, Val(LoopC), "Name", StreamData(LoopC).Name
-        WriteVar StreamFile, Val(LoopC), "NumOfParticles", Val(StreamData(LoopC).NumOfParticles)
-        WriteVar StreamFile, Val(LoopC), "X1", Val(StreamData(LoopC).x1)
-        WriteVar StreamFile, Val(LoopC), "Y1", Val(StreamData(LoopC).y1)
-        WriteVar StreamFile, Val(LoopC), "X2", Val(StreamData(LoopC).x2)
-        WriteVar StreamFile, Val(LoopC), "Y2", Val(StreamData(LoopC).y2)
-        WriteVar StreamFile, Val(LoopC), "Angle", Val(StreamData(LoopC).angle)
-        WriteVar StreamFile, Val(LoopC), "VecX1", Val(StreamData(LoopC).vecx1)
-        WriteVar StreamFile, Val(LoopC), "VecX2", Val(StreamData(LoopC).vecx2)
-        WriteVar StreamFile, Val(LoopC), "VecY1", Val(StreamData(LoopC).vecy1)
-        WriteVar StreamFile, Val(LoopC), "VecY2", Val(StreamData(LoopC).vecy2)
-        WriteVar StreamFile, Val(LoopC), "Life1", Val(StreamData(LoopC).life1)
-        WriteVar StreamFile, Val(LoopC), "Life2", Val(StreamData(LoopC).life2)
-        WriteVar StreamFile, Val(LoopC), "Friction", Val(StreamData(LoopC).friction)
-        WriteVar StreamFile, Val(LoopC), "Spin", Val(StreamData(LoopC).spin)
-        WriteVar StreamFile, Val(LoopC), "Spin_SpeedL", Val(StreamData(LoopC).spin_speedL)
-        WriteVar StreamFile, Val(LoopC), "Spin_SpeedH", Val(StreamData(LoopC).spin_speedH)
-        WriteVar StreamFile, Val(LoopC), "Grav_Strength", Val(StreamData(LoopC).grav_strength)
-        WriteVar StreamFile, Val(LoopC), "Bounce_Strength", Val(StreamData(LoopC).bounce_strength)
-    
-        WriteVar StreamFile, Val(LoopC), "AlphaBlend", Val(StreamData(LoopC).AlphaBlend)
-        WriteVar StreamFile, Val(LoopC), "Gravity", Val(StreamData(LoopC).gravity)
-    
-        WriteVar StreamFile, Val(LoopC), "XMove", Val(StreamData(LoopC).XMove)
-        WriteVar StreamFile, Val(LoopC), "YMove", Val(StreamData(LoopC).YMove)
-        WriteVar StreamFile, Val(LoopC), "move_x1", Val(StreamData(LoopC).move_x1)
-        WriteVar StreamFile, Val(LoopC), "move_x2", Val(StreamData(LoopC).move_x2)
-        WriteVar StreamFile, Val(LoopC), "move_y1", Val(StreamData(LoopC).move_y1)
-        WriteVar StreamFile, Val(LoopC), "move_y2", Val(StreamData(LoopC).move_y2)
-        WriteVar StreamFile, Val(LoopC), "Radio", Val(StreamData(LoopC).Radio)
-        WriteVar StreamFile, Val(LoopC), "life_counter", Val(StreamData(LoopC).life_counter)
-        WriteVar StreamFile, Val(LoopC), "Speed", Str(StreamData(LoopC).speed)
-    
-        WriteVar StreamFile, Val(LoopC), "resize", CInt(StreamData(LoopC).grh_resize)
-        WriteVar StreamFile, Val(LoopC), "rx", StreamData(LoopC).grh_resizex
-        WriteVar StreamFile, Val(LoopC), "ry", StreamData(LoopC).grh_resizey
-    
-        WriteVar StreamFile, Val(LoopC), "NumGrhs", Val(StreamData(LoopC).NumGrhs)
-    
-        GrhListing = vbNullString
 
-        For i = 1 To StreamData(LoopC).NumGrhs
-            GrhListing = GrhListing & StreamData(LoopC).grh_list(i) & ","
-        Next i
+        With StreamData(LoopC)
+        
+            Call FileManager.ChangeValue(Val(LoopC), "Name", .Name)
+            Call FileManager.ChangeValue(Val(LoopC), "NumOfParticles", Val(.NumOfParticles))
+            Call FileManager.ChangeValue(Val(LoopC), "X1", Val(.x1))
+            Call FileManager.ChangeValue(Val(LoopC), "Y1", Val(.y1))
+            Call FileManager.ChangeValue(Val(LoopC), "X2", Val(.x2))
+            Call FileManager.ChangeValue(Val(LoopC), "Y2", Val(.y2))
+            Call FileManager.ChangeValue(Val(LoopC), "Angle", Val(.angle))
+            Call FileManager.ChangeValue(Val(LoopC), "VecX1", Val(.vecx1))
+            Call FileManager.ChangeValue(Val(LoopC), "VecX2", Val(.vecx2))
+            Call FileManager.ChangeValue(Val(LoopC), "VecY1", Val(.vecy1))
+            Call FileManager.ChangeValue(Val(LoopC), "VecY2", Val(.vecy2))
+            Call FileManager.ChangeValue(Val(LoopC), "Life1", Val(.life1))
+            Call FileManager.ChangeValue(Val(LoopC), "Life2", Val(.life2))
+            Call FileManager.ChangeValue(Val(LoopC), "Friction", Val(.friction))
+            Call FileManager.ChangeValue(Val(LoopC), "Spin", Val(.spin))
+            Call FileManager.ChangeValue(Val(LoopC), "Spin_SpeedL", Val(.spin_speedL))
+            Call FileManager.ChangeValue(Val(LoopC), "Spin_SpeedH", Val(.spin_speedH))
+            Call FileManager.ChangeValue(Val(LoopC), "Grav_Strength", Val(.grav_strength))
+            Call FileManager.ChangeValue(Val(LoopC), "Bounce_Strength", Val(.bounce_strength))
     
-        WriteVar StreamFile, Val(LoopC), "Grh_List", GrhListing
+            Call FileManager.ChangeValue(Val(LoopC), "AlphaBlend", Val(.AlphaBlend))
+            Call FileManager.ChangeValue(Val(LoopC), "Gravity", Val(.gravity))
     
-        WriteVar StreamFile, Val(LoopC), "ColorSet1", StreamData(LoopC).colortint(0).r & "," & StreamData(LoopC).colortint(0).g & "," & StreamData(LoopC).colortint(0).B
-        WriteVar StreamFile, Val(LoopC), "ColorSet2", StreamData(LoopC).colortint(1).r & "," & StreamData(LoopC).colortint(1).g & "," & StreamData(LoopC).colortint(1).B
-        WriteVar StreamFile, Val(LoopC), "ColorSet3", StreamData(LoopC).colortint(2).r & "," & StreamData(LoopC).colortint(2).g & "," & StreamData(LoopC).colortint(2).B
-        WriteVar StreamFile, Val(LoopC), "ColorSet4", StreamData(LoopC).colortint(3).r & "," & StreamData(LoopC).colortint(3).g & "," & StreamData(LoopC).colortint(3).B
+            Call FileManager.ChangeValue(Val(LoopC), "XMove", Val(.XMove))
+            Call FileManager.ChangeValue(Val(LoopC), "YMove", Val(.YMove))
+            Call FileManager.ChangeValue(Val(LoopC), "move_x1", Val(.move_x1))
+            Call FileManager.ChangeValue(Val(LoopC), "move_x2", Val(.move_x2))
+            Call FileManager.ChangeValue(Val(LoopC), "move_y1", Val(.move_y1))
+            Call FileManager.ChangeValue(Val(LoopC), "move_y2", Val(.move_y2))
+            Call FileManager.ChangeValue(Val(LoopC), "Radio", Val(.Radio))
+            Call FileManager.ChangeValue(Val(LoopC), "life_counter", Val(.life_counter))
+            Call FileManager.ChangeValue(Val(LoopC), "Speed", Str(.speed))
     
+            Call FileManager.ChangeValue(Val(LoopC), "resize", CInt(.grh_resize))
+            Call FileManager.ChangeValue(Val(LoopC), "rx", .grh_resizex)
+            Call FileManager.ChangeValue(Val(LoopC), "ry", .grh_resizey)
+    
+            Call FileManager.ChangeValue(Val(LoopC), "NumGrhs", Val(.NumGrhs))
+    
+            GrhListing = vbNullString
+
+            For i = 1 To .NumGrhs
+                GrhListing = GrhListing & .grh_list(i) & ","
+            Next i
+    
+            Call FileManager.ChangeValue(Val(LoopC), "Grh_List", GrhListing)
+            
+            For j = 0 To 3
+                Call FileManager.ChangeValue(Val(LoopC), "ColorSet1", .colortint(j).r & "," & .colortint(j).g & "," & .colortint(j).B)
+            Next j
+
+        End With
+        
+        Call FileManager.DumpFile(StreamFile)
+        
     Next LoopC
-
+    
+    Set FileManager = Nothing
+        
     'Report the results
     If TotalStreams > 1 Then
-        MsgBox TotalStreams & " Particulas guardadas en: " & vbCrLf & StreamFile, vbInformation
+        Call MsgBox(TotalStreams & " Particulas guardadas en: " & vbCrLf & StreamFile, vbInformation)
     Else
-        MsgBox TotalStreams & " Particulas guardadas en: " & vbCrLf & StreamFile, vbInformation
-
+        Call MsgBox(TotalStreams & " Particulas guardadas en: " & vbCrLf & StreamFile, vbInformation)
     End If
-
+    
     'Set DataChanged variable to false
     DataChanged = False
     CurStreamFile = StreamFile
@@ -1209,57 +1212,59 @@ End Sub
 Private Sub Command5_Click()
 
     Dim Nombre          As String
-
     Dim NewStreamNumber As Integer
-
     Dim grhlist(0)      As Long
 
     'Get name for new stream
     Nombre = InputBox("Por favor inserte un nombre a la particula", "New Stream")
 
-    If Nombre = "" Then Exit Sub
+    If LenB(Nombre) = 0 Then Exit Sub
 
-    'Set new stream #
+    'Set new stream
     NewStreamNumber = List2.ListCount + 1
 
     'Add stream to combo box
-    List2.AddItem Nombre
+    Call List2.AddItem(Nombre)
 
     'Add 1 to TotalStreams
     TotalStreams = TotalStreams + 1
 
     grhlist(0) = 19751
+    
     'Add stream data to StreamData array
-    StreamData(NewStreamNumber).Name = Nombre
-    StreamData(NewStreamNumber).NumOfParticles = 20
-    StreamData(NewStreamNumber).x1 = 0
-    StreamData(NewStreamNumber).y1 = 0
-    StreamData(NewStreamNumber).x2 = 0
-    StreamData(NewStreamNumber).y2 = 0
-    StreamData(NewStreamNumber).angle = 0
-    StreamData(NewStreamNumber).vecx1 = -20
-    StreamData(NewStreamNumber).vecx2 = 20
-    StreamData(NewStreamNumber).vecy1 = -20
-    StreamData(NewStreamNumber).vecy2 = 20
-    StreamData(NewStreamNumber).life1 = 10
-    StreamData(NewStreamNumber).life2 = 50
-    StreamData(NewStreamNumber).friction = 8
-    StreamData(NewStreamNumber).spin_speedL = 0.1
-    StreamData(NewStreamNumber).spin_speedH = 0.1
-    StreamData(NewStreamNumber).grav_strength = 2
-    StreamData(NewStreamNumber).bounce_strength = -5
-    StreamData(NewStreamNumber).speed = 0.5
-    StreamData(NewStreamNumber).AlphaBlend = 1
-    StreamData(NewStreamNumber).gravity = 0
-    StreamData(NewStreamNumber).XMove = 0
-    StreamData(NewStreamNumber).YMove = 0
-    StreamData(NewStreamNumber).move_x1 = 0
-    StreamData(NewStreamNumber).move_x2 = 0
-    StreamData(NewStreamNumber).move_y1 = 0
-    StreamData(NewStreamNumber).move_y2 = 0
-    StreamData(NewStreamNumber).life_counter = -1
-    StreamData(NewStreamNumber).NumGrhs = 1
-    StreamData(NewStreamNumber).grh_list = grhlist()
+    With StreamData(NewStreamNumber)
+        .Name = Nombre
+        .NumOfParticles = 20
+        .x1 = 0
+        .y1 = 0
+        .x2 = 0
+        .y2 = 0
+        .angle = 0
+        .vecx1 = -20
+        .vecx2 = 20
+        .vecy1 = -20
+        .vecy2 = 20
+        .life1 = 10
+        .life2 = 50
+        .friction = 8
+        .spin_speedL = 0.1
+        .spin_speedH = 0.1
+        .grav_strength = 2
+        .bounce_strength = -5
+        .speed = 0.5
+        .AlphaBlend = 1
+        .gravity = 0
+        .XMove = 0
+        .YMove = 0
+        .move_x1 = 0
+        .move_x2 = 0
+        .move_y1 = 0
+        .move_y2 = 0
+        .life_counter = -1
+        .NumGrhs = 1
+        .grh_list = grhlist()
+    End With
+    
 
     'Select the new stream type in the combo box
     List2.ListIndex = NewStreamNumber - 1
@@ -1279,10 +1284,14 @@ Private Sub Command8_Click()
 End Sub
 
 Private Sub Form_Load()
-    lstColorSets.AddItem "Bottom Left"
-    lstColorSets.AddItem "Top Left"
-    lstColorSets.AddItem "Bottom Right"
-    lstColorSets.AddItem "Top Right"
+
+    With lstColorSets
+        Call .AddItem("Bottom Left")
+        Call .AddItem("Top Left")
+        Call .AddItem("Bottom Right")
+        Call .AddItem("Top Right")
+    End With
+    
     frmSettings.Visible = True
     frmfade.Visible = False
     frameColorSettings.Visible = False
@@ -1301,22 +1310,18 @@ End Sub
 
 Private Sub Form_QueryUnload(Cancel As Integer, UnloadMode As Integer)
     End
-
 End Sub
 
 Private Sub Form_Terminate()
     End
-
 End Sub
 
 Private Sub Form_Unload(Cancel As Integer)
     End
-
 End Sub
 
 Private Sub Label2_Click()
     End
-
 End Sub
 
 Private Sub List2_Click()
@@ -1331,66 +1336,67 @@ Sub CargarParticulasLista()
     DataTemp = DataChanged
 
     'Set the values
-    txtPCount.Text = StreamData(List2.ListIndex + 1).NumOfParticles
-    txtX1.Text = StreamData(List2.ListIndex + 1).x1
-    txtY1.Text = StreamData(List2.ListIndex + 1).y1
-    txtX2.Text = StreamData(List2.ListIndex + 1).x2
-    txtY2.Text = StreamData(List2.ListIndex + 1).y2
-    txtAngle.Text = StreamData(List2.ListIndex + 1).angle
-    vecx1.Text = StreamData(List2.ListIndex + 1).vecx1
-    vecx2.Text = StreamData(List2.ListIndex + 1).vecx2
-    vecy1.Text = StreamData(List2.ListIndex + 1).vecy1
-    vecy2.Text = StreamData(List2.ListIndex + 1).vecy2
-    life1.Text = StreamData(List2.ListIndex + 1).life1
-    life2.Text = StreamData(List2.ListIndex + 1).life2
-    fric.Text = StreamData(List2.ListIndex + 1).friction
-    chkSpin.Value = StreamData(List2.ListIndex + 1).spin
-    spin_speedL.Text = StreamData(List2.ListIndex + 1).spin_speedL
-    spin_speedH.Text = StreamData(List2.ListIndex + 1).spin_speedH
-    txtGravStrength.Text = StreamData(List2.ListIndex + 1).grav_strength
-    txtBounceStrength.Text = StreamData(List2.ListIndex + 1).bounce_strength
-    chkAlphaBlend.Value = StreamData(List2.ListIndex + 1).AlphaBlend
-    chkGravity.Value = StreamData(List2.ListIndex + 1).gravity
-    txtrx.Text = StreamData(List2.ListIndex + 1).grh_resizex
-    txtry.Text = StreamData(List2.ListIndex + 1).grh_resizey
-    chkXMove.Value = StreamData(List2.ListIndex + 1).XMove
-    chkYMove.Value = StreamData(List2.ListIndex + 1).YMove
-    move_x1.Text = StreamData(List2.ListIndex + 1).move_x1
-    move_x2.Text = StreamData(List2.ListIndex + 1).move_x2
-    move_y1.Text = StreamData(List2.ListIndex + 1).move_y1
-    move_y2.Text = StreamData(List2.ListIndex + 1).move_y2
-    txRad.Text = StreamData(List2.ListIndex + 1).Radio
+    With StreamData(List2.ListIndex + 1)
+        txtPCount.Text = .NumOfParticles
+        txtX1.Text = .x1
+        txtY1.Text = .y1
+        txtX2.Text = .x2
+        txtY2.Text = .y2
+        txtAngle.Text = .angle
+        vecx1.Text = .vecx1
+        vecx2.Text = .vecx2
+        vecy1.Text = .vecy1
+        vecy2.Text = .vecy2
+        life1.Text = .life1
+        life2.Text = .life2
+        fric.Text = .friction
+        chkSpin.Value = .spin
+        spin_speedL.Text = .spin_speedL
+        spin_speedH.Text = .spin_speedH
+        txtGravStrength.Text = .grav_strength
+        txtBounceStrength.Text = .bounce_strength
+        chkAlphaBlend.Value = .AlphaBlend
+        chkGravity.Value = .gravity
+        txtrx.Text = .grh_resizex
+        txtry.Text = .grh_resizey
+        chkXMove.Value = .XMove
+        chkYMove.Value = .YMove
+        move_x1.Text = .move_x1
+        move_x2.Text = .move_x2
+        move_y1.Text = .move_y1
+        move_y2.Text = .move_y2
+        txRad.Text = .Radio
 
-    If StreamData(List2.ListIndex + 1).grh_resize = True Then
-        chkresize = vbChecked
-    Else
-        chkresize = vbUnchecked
+        If .grh_resize = True Then
+            chkresize = vbChecked
+        Else
+            chkresize = vbUnchecked
+        End If
 
-    End If
+        If .life_counter = -1 Then
+            life.Enabled = False
+            chkNeverDies.Value = vbChecked
+        Else
+            life.Enabled = True
+            life.Text = .life_counter
+            chkNeverDies.Value = vbUnchecked
+        End If
 
-    If StreamData(List2.ListIndex + 1).life_counter = -1 Then
-        life.Enabled = False
-        chkNeverDies.Value = vbChecked
-    Else
-        life.Enabled = True
-        life.Text = StreamData(List2.ListIndex + 1).life_counter
-        chkNeverDies.Value = vbUnchecked
+        speed.Text = .speed
 
-    End If
+        lstSelGrhs.Clear
 
-    speed.Text = StreamData(List2.ListIndex + 1).speed
-
-    lstSelGrhs.Clear
-
-    For LoopC = 1 To StreamData(List2.ListIndex + 1).NumGrhs
-        Call lstSelGrhs.AddItem(StreamData(List2.ListIndex + 1).grh_list(LoopC))
-    Next LoopC
+        For LoopC = 1 To .NumGrhs
+            Call lstSelGrhs.AddItem(.grh_list(LoopC))
+        Next LoopC
+    
+    End With
 
     DataChanged = DataTemp
 
     indexs = frmMain.List2.ListIndex + 1
 
-    General_Particle_Create indexs, 50, 50
+    Call General_Particle_Create(indexs, 50, 50)
 
 End Sub
 
@@ -1402,41 +1408,45 @@ Private Sub List2_KeyUp(KeyCode As Integer, Shift As Integer)
     DataTemp = DataChanged
 
     'Set the values
-    txtPCount.Text = StreamData(List2.ListIndex + 1).NumOfParticles
-    txtX1.Text = StreamData(List2.ListIndex + 1).x1
-    txtY1.Text = StreamData(List2.ListIndex + 1).y1
-    txtX2.Text = StreamData(List2.ListIndex + 1).x2
-    txtY2.Text = StreamData(List2.ListIndex + 1).y2
-    txtAngle.Text = StreamData(List2.ListIndex + 1).angle
-    vecx1.Text = StreamData(List2.ListIndex + 1).vecx1
-    vecx2.Text = StreamData(List2.ListIndex + 1).vecx2
-    vecy1.Text = StreamData(List2.ListIndex + 1).vecy1
-    vecy2.Text = StreamData(List2.ListIndex + 1).vecy2
-    life1.Text = StreamData(List2.ListIndex + 1).life1
-    life2.Text = StreamData(List2.ListIndex + 1).life2
-    fric.Text = StreamData(List2.ListIndex + 1).friction
-    chkSpin.Value = StreamData(List2.ListIndex + 1).spin
-    spin_speedL.Text = StreamData(List2.ListIndex + 1).spin_speedL
-    spin_speedH.Text = StreamData(List2.ListIndex + 1).spin_speedH
-    txtGravStrength.Text = StreamData(List2.ListIndex + 1).grav_strength
-    txtBounceStrength.Text = StreamData(List2.ListIndex + 1).bounce_strength
+    With StreamData(List2.ListIndex + 1)
+    
+        txtPCount.Text = .NumOfParticles
+        txtX1.Text = .x1
+        txtY1.Text = .y1
+        txtX2.Text = .x2
+        txtY2.Text = .y2
+        txtAngle.Text = .angle
+        vecx1.Text = .vecx1
+        vecx2.Text = .vecx2
+        vecy1.Text = .vecy1
+        vecy2.Text = .vecy2
+        life1.Text = .life1
+        life2.Text = .life2
+        fric.Text = .friction
+        chkSpin.Value = .spin
+        spin_speedL.Text = .spin_speedL
+        spin_speedH.Text = .spin_speedH
+        txtGravStrength.Text = .grav_strength
+        txtBounceStrength.Text = .bounce_strength
 
-    chkAlphaBlend.Value = StreamData(List2.ListIndex + 1).AlphaBlend
-    chkGravity.Value = StreamData(List2.ListIndex + 1).gravity
+        chkAlphaBlend.Value = .AlphaBlend
+        chkGravity.Value = .gravity
 
-    chkXMove.Value = StreamData(List2.ListIndex + 1).XMove
-    chkYMove.Value = StreamData(List2.ListIndex + 1).YMove
-    move_x1.Text = StreamData(List2.ListIndex + 1).move_x1
-    move_x2.Text = StreamData(List2.ListIndex + 1).move_x2
-    move_y1.Text = StreamData(List2.ListIndex + 1).move_y1
-    move_y2.Text = StreamData(List2.ListIndex + 1).move_y2
-    txRad.Text = StreamData(List2.ListIndex + 1).Radio
+        chkXMove.Value = .XMove
+        chkYMove.Value = .YMove
+        move_x1.Text = .move_x1
+        move_x2.Text = .move_x2
+        move_y1.Text = .move_y1
+        move_y2.Text = .move_y2
+        txRad.Text = .Radio
 
-    lstSelGrhs.Clear
+        lstSelGrhs.Clear
 
-    For LoopC = 1 To StreamData(List2.ListIndex + 1).NumGrhs
-        Call lstSelGrhs.AddItem(StreamData(List2.ListIndex + 1).grh_list(LoopC))
-    Next LoopC
+        For LoopC = 1 To .NumGrhs
+            Call lstSelGrhs.AddItem(.grh_list(LoopC))
+        Next LoopC
+
+    End With
 
 End Sub
 
@@ -1603,10 +1613,12 @@ Private Sub txtry_Change()
 End Sub
 
 Private Sub vecx1_GotFocus()
-
-    vecx1.SelStart = 0
-    vecx1.SelLength = Len(vecx1.Text)
-
+    
+    With vecx1
+        .SelStart = 0
+        .SelLength = Len(.Text)
+    End With
+    
 End Sub
 
 Private Sub vecx1_Change()
@@ -1620,10 +1632,12 @@ Private Sub vecx1_Change()
 End Sub
 
 Private Sub vecx2_GotFocus()
-
-    vecx2.SelStart = 0
-    vecx2.SelLength = Len(vecx2.Text)
-
+    
+    With vecx2
+        .SelStart = 0
+        .SelLength = Len(.Text)
+    End With
+    
 End Sub
 
 Private Sub vecx2_Change()
@@ -1637,10 +1651,12 @@ Private Sub vecx2_Change()
 End Sub
 
 Private Sub vecy1_GotFocus()
-
-    vecy1.SelStart = 0
-    vecy1.SelLength = Len(vecy1.Text)
-
+    
+    With vecy1
+        .SelStart = 0
+        .SelLength = Len(.Text)
+    End With
+    
 End Sub
 
 Private Sub vecy1_Change()
@@ -1654,10 +1670,12 @@ Private Sub vecy1_Change()
 End Sub
 
 Private Sub vecy2_GotFocus()
-
-    vecy2.SelStart = 0
-    vecy2.SelLength = Len(vecy2.Text)
-
+    
+    With vecy2
+        .SelStart = 0
+        .SelLength = Len(.Text)
+    End With
+    
 End Sub
 
 Private Sub vecy2_Change()
@@ -1671,9 +1689,11 @@ Private Sub vecy2_Change()
 End Sub
 
 Private Sub life1_GotFocus()
-
-    life1.SelStart = 0
-    life1.SelLength = Len(life1.Text)
+    
+    With life1
+        .SelStart = 0
+        .SelLength = Len(.Text)
+    End With
 
 End Sub
 
@@ -1689,8 +1709,10 @@ End Sub
 
 Private Sub life2_GotFocus()
 
-    life2.SelStart = 0
-    life2.SelLength = Len(life2.Text)
+    With life2
+        .SelStart = 0
+        .SelLength = Len(.Text)
+    End With
 
 End Sub
 
@@ -1705,10 +1727,12 @@ Private Sub life2_Change()
 End Sub
 
 Private Sub fric_GotFocus()
-
-    fric.SelStart = 0
-    fric.SelLength = Len(fric.Text)
-
+    
+    With fric
+        .SelStart = 0
+        .SelLength = Len(.Text)
+    End With
+    
 End Sub
 
 Private Sub fric_Change()
@@ -1722,10 +1746,12 @@ Private Sub fric_Change()
 End Sub
 
 Private Sub spin_speedL_GotFocus()
-
-    spin_speedL.SelStart = 0
-    spin_speedL.SelLength = Len(spin_speedH.Text)
-
+    
+    With spin_speedL
+        .SelStart = 0
+        .SelLength = Len(.Text)
+    End With
+    
 End Sub
 
 Private Sub spin_speedL_Change()
@@ -1739,10 +1765,12 @@ Private Sub spin_speedL_Change()
 End Sub
 
 Private Sub spin_speedH_GotFocus()
-
-    spin_speedH.SelStart = 0
-    spin_speedH.SelLength = Len(spin_speedH.Text)
-
+    
+    With spin_speedH
+        .SelStart = 0
+        .SelLength = Len(.Text)
+    End With
+    
 End Sub
 
 Private Sub spin_speedH_Change()
@@ -1756,10 +1784,12 @@ Private Sub spin_speedH_Change()
 End Sub
 
 Private Sub txtPCount_GotFocus()
-
-    txtPCount.SelStart = 0
-    txtPCount.SelLength = Len(txtPCount.Text)
-
+    
+    With txtPCount
+        .SelStart = 0
+        .SelLength = Len(.Text)
+    End With
+    
 End Sub
 
 Private Sub txtPCount_Change()
@@ -1783,9 +1813,11 @@ Private Sub txtX1_Change()
 End Sub
 
 Private Sub txtX1_GotFocus()
-
-    txtX1.SelStart = 0
-    txtX1.SelLength = Len(txtX1.Text)
+    
+    With txtX1
+        .SelStart = 0
+        .SelLength = Len(.Text)
+    End With
 
 End Sub
 
@@ -1801,8 +1833,10 @@ End Sub
 
 Private Sub txtY1_GotFocus()
 
-    txtY1.SelStart = 0
-    txtY1.SelLength = Len(txtY1.Text)
+    With txtY1
+        .SelStart = 0
+        .SelLength = Len(.Text)
+    End With
 
 End Sub
 
@@ -1835,8 +1869,10 @@ End Sub
 
 Private Sub txtY2_GotFocus()
 
-    txtY2.SelStart = 0
-    txtY2.SelLength = Len(txtY2.Text)
+    With txtY2
+        .SelStart = 0
+        .SelLength = Len(.Text)
+    End With
 
 End Sub
 
@@ -1852,8 +1888,10 @@ End Sub
 
 Private Sub txtAngle_GotFocus()
 
-    txtAngle.SelStart = 0
-    txtAngle.SelLength = Len(txtAngle.Text)
+    With txtAngle
+        .SelStart = 0
+        .SelLength = Len(.Text)
+    End With
 
 End Sub
 
@@ -1868,9 +1906,11 @@ Private Sub txtGravStrength_Change()
 End Sub
 
 Private Sub txtGravStrength_GotFocus()
-
-    txtGravStrength.SelStart = 0
-    txtGravStrength.SelLength = Len(txtGravStrength.Text)
+    
+    With txtGravStrength
+        .SelStart = 0
+        .SelLength = Len(.Text)
+    End With
 
 End Sub
 
@@ -1885,9 +1925,11 @@ Private Sub txtBounceStrength_Change()
 End Sub
 
 Private Sub txtBounceStrength_GotFocus()
-
-    txtBounceStrength.SelStart = 0
-    txtBounceStrength.SelLength = Len(txtBounceStrength.Text)
+    
+    With txtBounceStrength
+        .SelStart = 0
+        .SelLength = Len(.Text)
+    End With
 
 End Sub
 
@@ -1902,10 +1944,12 @@ Private Sub move_x1_Change()
 End Sub
 
 Private Sub move_x1_GotFocus()
-
-    move_x1.SelStart = 0
-    move_x1.SelLength = Len(move_x1.Text)
-
+    
+    With move_x1
+        .SelStart = 0
+        .SelLength = Len(.Text)
+    End With
+    
 End Sub
 
 Private Sub move_x2_Change()
@@ -1919,10 +1963,12 @@ Private Sub move_x2_Change()
 End Sub
 
 Private Sub move_x2_GotFocus()
-
-    move_x2.SelStart = 0
-    move_x2.SelLength = Len(move_x2.Text)
-
+    
+    With move_x2
+        .SelStart = 0
+        .SelLength = Len(.Text)
+    End With
+    
 End Sub
 
 Private Sub move_y1_Change()
@@ -1936,10 +1982,12 @@ Private Sub move_y1_Change()
 End Sub
 
 Private Sub move_y1_GotFocus()
-
-    move_y1.SelStart = 0
-    move_y1.SelLength = Len(move_y1.Text)
-
+    
+    With move_y1
+        .SelStart = 0
+        .SelLength = Len(.Text)
+    End With
+    
 End Sub
 
 Private Sub move_y2_Change()
@@ -1954,9 +2002,11 @@ End Sub
 
 Private Sub move_y2_GotFocus()
 
-    move_y2.SelStart = 0
-    move_y2.SelLength = Len(move_y2.Text)
-
+    With move_y2
+        .SelStart = 0
+        .SelLength = Len(.Text)
+    End With
+    
 End Sub
 
 Private Sub chkAlphaBlend_Click()
@@ -1979,7 +2029,6 @@ Private Sub chkGravity_Click()
     Else
         txtGravStrength.Enabled = False
         txtBounceStrength.Enabled = False
-
     End If
 
 End Sub
@@ -1996,7 +2045,6 @@ Private Sub chkXMove_Click()
     Else
         move_x1.Enabled = False
         move_x2.Enabled = False
-
     End If
 
 End Sub
@@ -2013,7 +2061,6 @@ Private Sub chkYMove_Click()
     Else
         move_y1.Enabled = False
         move_y2.Enabled = False
-
     End If
 
 End Sub
@@ -2034,15 +2081,18 @@ End Sub
 Private Sub chkNeverDies_Click()
 
     DataChanged = True
+    
+    With StreamData(frmMain.List2.ListIndex + 1)
 
-    If chkNeverDies.Value = vbChecked Then
-        life.Enabled = False
-        StreamData(frmMain.List2.ListIndex + 1).life_counter = -1
-    Else
-        life.Enabled = True
-        StreamData(frmMain.List2.ListIndex + 1).life_counter = life.Text
-
-    End If
+        If chkNeverDies.Value = vbChecked Then
+            life.Enabled = False
+            .life_counter = -1
+        Else
+            life.Enabled = True
+            .life_counter = life.Text
+        End If
+    
+    End With
 
 End Sub
 
@@ -2058,7 +2108,6 @@ Private Sub chkSpin_Click()
     Else
         spin_speedL.Enabled = False
         spin_speedH.Enabled = False
-
     End If
 
 End Sub
@@ -2088,20 +2137,23 @@ End Sub
 
 Private Sub life_GotFocus()
 
-    life.SelStart = 0
-    life.SelLength = Len(life.Text)
+    With life
+        .SelStart = 0
+        .SelLength = Len(.Text)
+    End With
 
 End Sub
 
 Private Sub lstColorSets_Click()
 
     Dim DataTemp As Boolean
-
-    DataTemp = DataChanged
-
-    RScroll.Value = StreamData(frmMain.List2.ListIndex + 1).colortint(lstColorSets.ListIndex).r
-    GScroll.Value = StreamData(frmMain.List2.ListIndex + 1).colortint(lstColorSets.ListIndex).g
-    BScroll.Value = StreamData(frmMain.List2.ListIndex + 1).colortint(lstColorSets.ListIndex).B
+        DataTemp = DataChanged
+    
+    With StreamData(frmMain.List2.ListIndex + 1).colortint(lstColorSets.ListIndex)
+        RScroll.Value = .r
+        GScroll.Value = .g
+        BScroll.Value = .B
+    End With
 
     DataChanged = DataTemp
 
@@ -2114,6 +2166,7 @@ Private Sub RScroll_Change()
     DataChanged = True
 
     StreamData(frmMain.List2.ListIndex + 1).colortint(lstColorSets.ListIndex).r = RScroll.Value
+    
     txtR.Text = RScroll.Value
 
     picColor.BackColor = RGB(txtB.Text, txtG.Text, txtR.Text)
@@ -2128,13 +2181,16 @@ Private Sub speed_Change()
 
     'Arrange decimal separator
     Dim temp As String
-
-    temp = ReadField(1, speed.Text, 44)
+        temp = ReadField(1, speed.Text, 44)
 
     If LenB(temp) Then
-        speed.Text = temp & "." & Right(speed.Text, Len(speed.Text) - Len(temp) - 1)
-        speed.SelStart = Len(speed.Text)
-        speed.SelLength = 0
+    
+        With speed
+            .Text = temp & "." & Right(.Text, Len(.Text) - Len(temp) - 1)
+            .SelStart = Len(.Text)
+            .SelLength = 0
+        End With
+        
     End If
 
     StreamData(frmMain.List2.ListIndex + 1).speed = Val(speed.Text)
@@ -2161,20 +2217,25 @@ Private Sub cmdDelete_Click()
     
     Dim LoopC As Long
 
-    If lstSelGrhs.ListIndex >= 0 Then lstSelGrhs.RemoveItem lstSelGrhs.ListIndex
-
-    StreamData(List2.ListIndex + 1).NumGrhs = lstSelGrhs.ListCount
-
-    If StreamData(List2.ListIndex + 1).NumGrhs = 0 Then
-        Erase StreamData(List2.ListIndex + 1).grh_list
-    Else
-        ReDim StreamData(List2.ListIndex + 1).grh_list(1 To lstSelGrhs.ListCount)
-
+    If lstSelGrhs.ListIndex >= 0 Then
+        Call lstSelGrhs.RemoveItem(lstSelGrhs.ListIndex)
     End If
+    
+    With StreamData(List2.ListIndex + 1)
+    
+        .NumGrhs = lstSelGrhs.ListCount
 
-    For LoopC = 1 To StreamData(List2.ListIndex + 1).NumGrhs
-        StreamData(List2.ListIndex + 1).grh_list(LoopC) = lstSelGrhs.List(LoopC - 1)
-    Next LoopC
+        If .NumGrhs = 0 Then
+            Erase .grh_list
+        Else
+            ReDim .grh_list(1 To lstSelGrhs.ListCount)
+        End If
+
+        For LoopC = 1 To .NumGrhs
+            .grh_list(LoopC) = lstSelGrhs.List(LoopC - 1)
+        Next LoopC
+    
+    End With
 
 End Sub
 
@@ -2211,24 +2272,33 @@ Private Sub cmdAdd_Click()
 
     If lstGrhs.ListIndex >= 0 Then
         Call lstSelGrhs.AddItem(lstGrhs.List(lstGrhs.ListIndex))
+
     End If
+    
+    With StreamData(List2.ListIndex + 1)
+    
+        .NumGrhs = lstSelGrhs.ListCount
 
-    StreamData(List2.ListIndex + 1).NumGrhs = lstSelGrhs.ListCount
+        ReDim .grh_list(1 To lstSelGrhs.ListCount)
 
-    ReDim StreamData(List2.ListIndex + 1).grh_list(1 To lstSelGrhs.ListCount)
-
-    For LoopC = 1 To StreamData(List2.ListIndex + 1).NumGrhs
-        StreamData(List2.ListIndex + 1).grh_list(LoopC) = lstSelGrhs.List(LoopC - 1)
-    Next LoopC
-
+        For LoopC = 1 To .NumGrhs
+            .grh_list(LoopC) = lstSelGrhs.List(LoopC - 1)
+        Next LoopC
+    
+    End With
+    
 End Sub
 
 Private Sub chkresize_Click()
+    
+    With StreamData(frmMain.List2.ListIndex + 1)
+    
+        If chkresize.Value = vbChecked Then
+            .grh_resize = True
+        Else
+            .grh_resize = False
+        End If
 
-    If chkresize.Value = vbChecked Then
-        StreamData(frmMain.List2.ListIndex + 1).grh_resize = True
-    Else
-        StreamData(frmMain.List2.ListIndex + 1).grh_resize = False
-    End If
+    End With
 
 End Sub

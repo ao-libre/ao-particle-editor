@@ -4,6 +4,7 @@ Codigo/*.log
 *.csi
 *.lvw
 *.OBJ
+*.exe
 
 # System Files.
 .DS_Store

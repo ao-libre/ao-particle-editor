@@ -85,7 +85,6 @@ Public Function GetTexture(ByVal FileName As Integer, _
     If FileName = 0 Then
         Debug.Print "0 GRH ATMPT TO BE LOADED"
         Exit Function
-
     End If
 
     Dim i As Long
@@ -148,11 +147,9 @@ Private Function CrearGrafico(ByVal Archivo As Integer, _
     On Error GoTo ErrHandler
 
     Dim surface_desc As D3DSURFACE_DESC
-
     Dim texture_info As D3DXIMAGE_INFO
-
     Dim index        As Integer
-
+        
     index = Archivo Mod HASH_TABLE_SIZE
 
     With TexList(index)
@@ -187,11 +184,12 @@ Private Function CrearGrafico(ByVal Archivo As Integer, _
 
         If Not RemoveLRU() Then
             Exit Do
-
         End If
 
     Loop
+    
     Exit Function
+    
 ErrHandler:
     Debug.Print "ERROR EN GRHLOAD>" & Archivo & ".bmp"
 
@@ -209,13 +207,9 @@ Private Function RemoveLRU() As Boolean
     'WWWW.RINCONDELAO.COM.AR
     '**************************************************************
     Dim LRUi         As Long
-
     Dim LRUj         As Long
-
     Dim LRUtime      As Long
-
     Dim i            As Long
-
     Dim j            As Long
 
     Dim surface_desc As D3DSURFACE_DESC
@@ -233,7 +227,6 @@ Private Function RemoveLRU() As Boolean
                     LRUi = i
                     LRUj = j
                     LRUtime = .SurfaceEntry(j).UltimoAcceso
-
                 End If
 
             Next j
@@ -265,7 +258,6 @@ Private Function RemoveLRU() As Boolean
                 ReDim Preserve .SurfaceEntry(1 To .surfaceCount) As SURFACE_ENTRY_DYN
             Else
                 Erase .SurfaceEntry
-
             End If
 
         End With

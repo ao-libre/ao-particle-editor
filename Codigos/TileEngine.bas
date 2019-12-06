@@ -264,33 +264,36 @@ Public Sub InitGrh(ByRef Grh As Grh, _
     'Sets up a grh. MUST be done before rendering
     '*****************************************************************
     If grhindex = 0 Then Exit Sub
-    Grh.grhindex = grhindex
     
-    If Started = 2 Then
-        If GrhData(Grh.grhindex).NumFrames > 1 Then
-            Grh.Started = 1
+    With Grh
+    
+        .grhindex = grhindex
+    
+        If Started = 2 Then
+            If GrhData(.grhindex).NumFrames > 1 Then
+                .Started = 1
+            Else
+                .Started = 0
+            End If
+
         Else
-            Grh.Started = 0
+
+            'Make sure the graphic can be started
+            If GrhData(Grh.grhindex).NumFrames = 1 Then Started = 0
+            .Started = Started
 
         End If
-
-    Else
-
-        'Make sure the graphic can be started
-        If GrhData(Grh.grhindex).NumFrames = 1 Then Started = 0
-        Grh.Started = Started
-
-    End If
     
-    If Grh.Started Then
-        Grh.Loops = INFINITE_LOOPS
-    Else
-        Grh.Loops = 0
-
-    End If
+        If .Started Then
+            .Loops = INFINITE_LOOPS
+        Else
+            .Loops = 0
+        End If
     
-    Grh.FrameCounter = 1
-    Grh.speed = GrhData(Grh.grhindex).speed
+        .FrameCounter = 1
+        .speed = GrhData(Grh.grhindex).speed
+    
+    End With
 
 End Sub
 
@@ -300,9 +303,9 @@ Function InMapBounds(ByVal x As Integer, ByVal Y As Integer) As Boolean
     '*****************************************************************
     'Checks to see if a tile position is in the maps bounds
     '*****************************************************************
+    
     If x < XMinMapSize Or x > XMaxMapSize Or Y < YMinMapSize Or Y > YMaxMapSize Then
         Exit Function
-
     End If
     
     InMapBounds = True
@@ -323,7 +326,6 @@ Private Function GetElapsedTime() As Single
     'Get the timer frequency
     If timer_freq = 0 Then
         Call QueryPerformanceFrequency(timer_freq)
-
     End If
     
     'Get current time
@@ -338,7 +340,7 @@ Private Function GetElapsedTime() As Single
 End Function
 
 Public Sub Grh_Render_To_Hdc(ByVal desthDC As Long, _
-                             grh_index As Long, _
+                             ByVal grh_index As Long, _
                              ByVal screen_x As Integer, _
                              ByVal screen_y As Integer, _
                              Optional transparent As Boolean = False)
@@ -366,44 +368,50 @@ Public Sub Grh_Render_To_Hdc(ByVal desthDC As Long, _
     Dim PrevObj2   As Long
 
     If grh_index <= 0 Then Exit Sub
-
-    'If it's animated switch grh_index to first frame
-    If GrhData(grh_index).NumFrames <> 1 Then
-        grh_index = GrhData(grh_index).Frames(1)
-
-    End If
-
-    file_path = App.Path & "\graficos\" & GrhData(grh_index).FileNum & ".bmp"
-        
-    src_x = GrhData(grh_index).SX
-    src_y = GrhData(grh_index).SY
-    src_width = GrhData(grh_index).pixelWidth
-    src_height = GrhData(grh_index).pixelHeight
+    
+    With GrhData(grh_index)
+    
+        'If it's animated switch grh_index to first frame
+        If .NumFrames <> 1 Then
+            grh_index = .Frames(1)
+        End If
+    
+        file_path = App.Path & "\Graficos\" & .FileNum & ".bmp"
+            
+        src_x = .SX
+        src_y = .SY
+        src_width = .pixelWidth
+        src_height = .pixelHeight
+    
+    End With
+    
             
     hdcsrc = CreateCompatibleDC(desthDC)
     PrevObj = SelectObject(hdcsrc, LoadPicture(file_path))
         
     If transparent = False Then
-        BitBlt desthDC, screen_x, screen_y, src_width, src_height, hdcsrc, src_x, src_y, vbSrcCopy
+        
+        Call BitBlt(desthDC, screen_x, screen_y, src_width, src_height, hdcsrc, src_x, src_y, vbSrcCopy)
+    
     Else
+    
         MaskDC = CreateCompatibleDC(desthDC)
-            
         PrevObj2 = SelectObject(MaskDC, LoadPicture(file_path))
             
-        Grh_Create_Mask hdcsrc, MaskDC, src_x, src_y, src_width, src_height
+        Call Grh_Create_Mask(hdcsrc, MaskDC, src_x, src_y, src_width, src_height)
             
         'Render tranparently
-        BitBlt desthDC, screen_x, screen_y, src_width, src_height, MaskDC, src_x, src_y, vbSrcAnd
-        BitBlt desthDC, screen_x, screen_y, src_width, src_height, hdcsrc, src_x, src_y, vbSrcPaint
+        Call BitBlt(desthDC, screen_x, screen_y, src_width, src_height, MaskDC, src_x, src_y, vbSrcAnd)
+        Call BitBlt(desthDC, screen_x, screen_y, src_width, src_height, hdcsrc, src_x, src_y, vbSrcPaint)
             
         Call DeleteObject(SelectObject(MaskDC, PrevObj2))
             
-        DeleteDC MaskDC
+        Call DeleteDC(MaskDC)
 
     End If
         
     Call DeleteObject(SelectObject(hdcsrc, PrevObj))
-    DeleteDC hdcsrc
+    Call DeleteDC(hdcsrc)
     
     Exit Sub
     
@@ -424,11 +432,8 @@ Private Sub Grh_Create_Mask(ByRef hdcsrc As Long, _
     'Creates a Mask hDC, and sets the source hDC to work for trans bliting.
     '**************************************************************
     Dim x          As Integer
-
     Dim Y          As Integer
-
     Dim TransColor As Long
-
     Dim ColorKey   As String
 
     'Make it a mask (set background to black and foreground to white)
@@ -437,11 +442,10 @@ Private Sub Grh_Create_Mask(ByRef hdcsrc As Long, _
         For x = src_x To src_width + src_x
 
             If GetPixel(hdcsrc, x, Y) = TransColor Then
-                SetPixel MaskDC, x, Y, vbWhite
-                SetPixel hdcsrc, x, Y, vbBlack
+                Call SetPixel(MaskDC, x, Y, vbWhite)
+                Call SetPixel(hdcsrc, x, Y, vbBlack)
             Else
-                SetPixel MaskDC, x, Y, vbBlack
-
+                Call SetPixel(MaskDC, x, Y, vbBlack)
             End If
 
         Next x

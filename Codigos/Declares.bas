@@ -5,9 +5,7 @@ Public indexs
 Option Explicit
 
 Public font_list() As D3DXFont
-
 Public mode        As Boolean
-
 Public temp_rgb(3) As Long
 
 'drag&drop cosas
@@ -21,9 +19,7 @@ Public Declare Function SendMessage _
                                      lParam As Any) As Long
 
 Public Const HTCAPTION = 2
-
 Public Const WM_NCLBUTTONDOWN = &HA1
-
 Public Const RGN_OR = 2
 
 Public DataChanged As Boolean
@@ -31,64 +27,22 @@ Public DataChanged As Boolean
 Public grh_index   As Byte
 
 Public Type tCabecera 'Cabecera de los con
-
     desc As String * 255
     CRC As Long
     MagicWord As Long
-
 End Type
 
 Public MiCabecera As tCabecera
 
 Public SurfaceDB  As clsTexManager
 
-#If SeguridadAlkon Then
-
-    Public md5 As New clsMD5
-#End If
-
-Public Const MIdi_Inicio As Byte = 6
-
-Public RawServersList    As String
+Public FileManager As clsIniManager
 
 Public Type tColor
-
     r As Byte
     g As Byte
     B As Byte
-
 End Type
-
-Public ColoresPJ(0 To 50) As tColor
-
-Public Type tServerInfo
-
-    Ip As String
-    Puerto As Integer
-    desc As String
-    PassRecPort As Integer
-
-End Type
-
-Public currentMidi       As Long
-
-Public ServersLst()      As tServerInfo
-
-Public ServersRecibidos  As Boolean
-
-Public CurServer         As Integer
-
-Public CreandoClan       As Boolean
-
-Public ClanName          As String
-
-Public Site              As String
-
-Public UserCiego         As Boolean
-
-Public UserEstupido      As Boolean
-
-Public NoRes             As Boolean 'no cambiar la resolucion
 
 Public RainBufferIndex   As Long
 

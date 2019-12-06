@@ -9,6 +9,7 @@ Begin VB.Form frmCargando
    ClientTop       =   0
    ClientWidth     =   4440
    ControlBox      =   0   'False
+   FillStyle       =   0  'Solid
    LinkTopic       =   "Form1"
    MaxButton       =   0   'False
    MinButton       =   0   'False
@@ -30,7 +31,6 @@ Begin VB.Form frmCargando
       _ExtentY        =   1270
       _Version        =   393217
       BackColor       =   14737632
-      Enabled         =   -1  'True
       ReadOnly        =   -1  'True
       ScrollBars      =   2
       TextRTF         =   $"frmCargando.frx":0C7C
