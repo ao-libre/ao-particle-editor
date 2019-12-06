@@ -1,0 +1,1 @@
+Editor de Particulas para el sistema ORE, aportado por Lorwik [en GS-Zone](https://www.gs-zone.org/temas/winter-ao-ultimate-extra.98915/)
