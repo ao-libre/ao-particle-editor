@@ -757,7 +757,7 @@ Public Sub Grh_Render(ByRef Grh As Grh, _
     
 End Sub
 
-Private Sub Convert_Heading_to_Direction(ByVal Heading As Long, _
+Public Sub Convert_Heading_to_Direction(ByVal Heading As Long, _
                                          ByRef direction_x As Long, _
                                          ByRef direction_y As Long)
 
