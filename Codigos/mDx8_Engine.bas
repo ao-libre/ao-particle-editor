@@ -1,6 +1,17 @@
 Attribute VB_Name = "mDx8_Engine"
 'MOTOR GRÁFICO ESCRITO(mayormente) POR MENDUZ@NOICODER.COM
 Option Explicit
+ 
+Private Type decoration
+    Grh As Grh
+    Render_On_Top As Boolean
+    subtile_pos As Byte
+End Type
+
+
+Public bRunning           As Boolean
+
+Private Const FVF = D3DFVF_XYZRHW Or D3DFVF_TEX1 Or D3DFVF_DIFFUSE Or D3DFVF_SPECULAR
 
 Private Declare Function QueryPerformanceFrequency _
                 Lib "kernel32" (lpFrequency As Currency) As Long
@@ -16,6 +27,12 @@ Public timerTicksPerFrame     As Double
 Public engineBaseSpeed         As Single
 
 Private lFrameTimer            As Long
+
+Private ScrollPixelsPerFrameX  As Byte
+Private ScrollPixelsPerFrameY  As Byte
+
+Private TileBufferPixelOffsetX As Integer
+Private TileBufferPixelOffsetY As Integer
 
 Private HalfWindowTileWidth    As Integer
 Private HalfWindowTileHeight   As Integer
@@ -52,12 +69,15 @@ Private Function GetElapsedTime() As Single
     'Gets the time that past since the last call
     '**************************************************************
     Dim start_time    As Currency
+
     Static end_time   As Currency
+
     Static timer_freq As Currency
 
     'Get the timer frequency
     If timer_freq = 0 Then
-        Call QueryPerformanceFrequency(timer_freq)
+        QueryPerformanceFrequency timer_freq
+
     End If
     
     'Get current time
@@ -75,13 +95,10 @@ Function MakeVector(ByVal x As Single, ByVal Y As Single, ByVal Z As Single) As 
     '*****************************************************
     '****** Coded by Menduz (lord.yo.wo@gmail.com) *******
     '*****************************************************
-    
-    With MakeVector
-        .x = x
-        .Y = Y
-        .Z = Z
-    End With
-    
+    MakeVector.x = x
+    MakeVector.Y = Y
+    MakeVector.Z = Z
+
 End Function
 
 Public Sub Engine_Init()
@@ -100,8 +117,8 @@ Public Sub Engine_Init()
     Set D3D = DirectX.Direct3DCreate()
     Set D3DX = New D3DX8
     
-    Call D3D.GetAdapterDisplayMode(D3DADAPTER_DEFAULT, DispMode)
-    Call D3D.GetAdapterDisplayMode(D3DADAPTER_DEFAULT, DispModeBK)
+    D3D.GetAdapterDisplayMode D3DADAPTER_DEFAULT, DispMode
+    D3D.GetAdapterDisplayMode D3DADAPTER_DEFAULT, DispModeBK
     
     With D3DWindow
         .Windowed = True
@@ -112,6 +129,7 @@ Public Sub Engine_Init()
         .EnableAutoDepthStencil = 1
         .AutoDepthStencilFormat = D3DFMT_D16
         .hDeviceWindow = frmMain.renderer.hWnd
+
     End With
 
     DispMode.Format = D3DFMT_X8R8G8B8
@@ -120,7 +138,7 @@ Public Sub Engine_Init()
 
         Dim Caps8 As D3DCAPS8
 
-        Call D3D.GetDeviceCaps(0, D3DDEVTYPE_HAL, Caps8)
+        D3D.GetDeviceCaps 0, D3DDEVTYPE_HAL, Caps8
 
         If (Caps8.TextureOpCaps And D3DTEXOPCAPS_DOTPRODUCT3) = D3DTEXOPCAPS_DOTPRODUCT3 Then
             bump_map_supported = True
@@ -139,38 +157,47 @@ Public Sub Engine_Init()
     HalfWindowTileHeight = (frmMain.renderer.ScaleHeight / 32) \ 2
     HalfWindowTileWidth = (frmMain.renderer.ScaleWidth / 32) \ 2
     
-    With D3DDevice
+    TileBufferSize = 9
+    TileBufferPixelOffsetX = (TileBufferSize - 1) * 32
+    TileBufferPixelOffsetY = (TileBufferSize - 1) * 32
     
-        Call .SetVertexShader(D3DFVF_XYZRHW Or D3DFVF_TEX1 Or D3DFVF_DIFFUSE Or D3DFVF_SPECULAR)
+    D3DDevice.SetVertexShader FVF
     
-        '//Transformed and lit vertices dont need lighting
-        '   so we disable it...
-        Call .SetRenderState(D3DRS_LIGHTING, False)
-        
-        Call .SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA)
-        Call .SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA)
-        Call .SetRenderState(D3DRS_ALPHABLENDENABLE, True)
-        
-        'Partículas
-        Call .SetRenderState(D3DRS_POINTSIZE, Engine_FToDW(2))
-        Call .SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_MODULATE)
-        Call .SetRenderState(D3DRS_POINTSPRITE_ENABLE, 1)
-        Call .SetRenderState(D3DRS_POINTSCALE_ENABLE, 0)
+    '//Transformed and lit vertices dont need lighting
+    '   so we disable it...
+    D3DDevice.SetRenderState D3DRS_LIGHTING, False
     
-    End With
+    D3DDevice.SetRenderState D3DRS_SRCBLEND, D3DBLEND_SRCALPHA
+    D3DDevice.SetRenderState D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA
+    D3DDevice.SetRenderState D3DRS_ALPHABLENDENABLE, True
     
     Call SurfaceDB.Init(D3DX, D3DDevice)
 
     engineBaseSpeed = 0.017
     
     ReDim MapData(XMinMapSize To XMaxMapSize, YMinMapSize To YMaxMapSize) As MapBlock
-
+    
+    ScrollPixelsPerFrameX = 8
+    ScrollPixelsPerFrameY = 8
+    
+    MinXBorder = XMinMapSize
+    MaxXBorder = XMaxMapSize
+    MinYBorder = YMinMapSize
+    MaxYBorder = YMaxMapSize
+    
+    'partículas
+    D3DDevice.SetRenderState D3DRS_POINTSIZE, Engine_FToDW(2)
+    D3DDevice.SetTextureStageState 0, D3DTSS_ALPHAOP, D3DTOP_MODULATE
+    D3DDevice.SetRenderState D3DRS_POINTSPRITE_ENABLE, 1
+    D3DDevice.SetRenderState D3DRS_POINTSCALE_ENABLE, 0
+    
+    bRunning = True
     Exit Sub
-    
 ErrHandler:
-    Debug.Print "Error: " & Err.Number
-    End
-    
+
+    Debug.Print "Error Number Returned: " & Err.Number
+    bRunning = False
+
 End Sub
 
 Public Sub Engine_DeInitialize()
@@ -200,24 +227,20 @@ Public Sub Render()
     '*****************************************************
     '****** Coded by Menduz (lord.yo.wo@gmail.com) *******
     '*****************************************************
+
+    Call D3DDevice.BeginScene
+    Call D3DDevice.Clear(0, ByVal 0, D3DCLEAR_TARGET, 0, 1#, 0)
     
-    With D3DDevice
+    Call RenderScreen(50, 50)
+    Call Engine_ActFPS
     
-        Call .BeginScene
-        Call .Clear(0, ByVal 0, D3DCLEAR_TARGET, 0, 1#, 0)
-    
-        Call RenderScreen(50, 50)
-        Call Engine_ActFPS
-    
-        With frmMain.Label1
-            .Caption = "FPS: " & FPS
-            .Refresh
-        End With
-    
-        Call .EndScene
-        Call .Present(ByVal 0, ByVal 0, 0, ByVal 0)
-    
+    With frmMain.Label1
+        .Caption = "FPS: " & FPS
+        .Refresh
     End With
+    
+    Call D3DDevice.EndScene
+    Call D3DDevice.Present(ByVal 0, ByVal 0, 0, ByVal 0)
 
     FramesPerSecCounter = FramesPerSecCounter + 1
     timerElapsedTime = GetElapsedTime()

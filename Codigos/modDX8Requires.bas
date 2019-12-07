@@ -43,6 +43,15 @@ End Type
 
 Private Declare Sub GlobalMemoryStatus Lib "kernel32" (lpBuffer As MEMORYSTATUS)
 
+Public Function General_Bytes_To_Megabytes(Bytes As Double) As Double
+
+    Dim dblAns As Double
+        dblAns = (Bytes / 1024) / 1024
+    
+    General_Bytes_To_Megabytes = format(dblAns, "###,###,##0.00")
+
+End Function
+
 Public Function General_Get_Free_Ram_Bytes() As Long
     
     Call GlobalMemoryStatus(pUdtMemStatus)
