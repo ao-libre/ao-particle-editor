@@ -1080,8 +1080,7 @@ Option Explicit
 Public CurStreamFile As String
 
 Private Sub Command4_Click()
-
-    Dim LoopC      As Long
+    
     Dim StreamFile As String
     Dim Bypass     As Boolean
     Dim RetVal     As Byte
@@ -1117,90 +1116,87 @@ Private Sub Command4_Click()
         End With
     
         If FileExists(StreamFile, vbNormal) = True Then
+            
             RetVal = MsgBox("¡El archivo " & StreamFile & " ya existe!" & vbCrLf & "¿Desea sobreescribirlo?", vbYesNo Or vbQuestion)
+
             If RetVal = vbNo Then Exit Sub
+
         End If
 
     End If
 
     Dim GrhListing As String
-    Dim i          As Long, j As Long
-    Set FileManager = New clsIniManager
+    Dim i          As Long
+    Dim j          As Long
+    Dim LoopC      As Long
 
     'Check for existing data file and kill it
     If FileExists(StreamFile, vbNormal) Then Kill StreamFile
 
     'Write particle data to Particles.ini
-    Call FileManager.ChangeValue("INIT", "Total", Val(TotalStreams))
+    Call WriteVar(StreamFile, "INIT", "Total", Val(TotalStreams))
 
     For LoopC = 1 To TotalStreams
+        Call WriteVar(StreamFile, Val(LoopC), "Name", StreamData(LoopC).Name)
+        Call WriteVar(StreamFile, Val(LoopC), "NumOfParticles", Val(StreamData(LoopC).NumOfParticles))
+        Call WriteVar(StreamFile, Val(LoopC), "X1", Val(StreamData(LoopC).x1))
+        Call WriteVar(StreamFile, Val(LoopC), "Y1", Val(StreamData(LoopC).y1))
+        Call WriteVar(StreamFile, Val(LoopC), "X2", Val(StreamData(LoopC).x2))
+        Call WriteVar(StreamFile, Val(LoopC), "Y2", Val(StreamData(LoopC).y2))
+        Call WriteVar(StreamFile, Val(LoopC), "Angle", Val(StreamData(LoopC).angle))
+        Call WriteVar(StreamFile, Val(LoopC), "VecX1", Val(StreamData(LoopC).vecx1))
+        Call WriteVar(StreamFile, Val(LoopC), "VecX2", Val(StreamData(LoopC).vecx2))
+        Call WriteVar(StreamFile, Val(LoopC), "VecY1", Val(StreamData(LoopC).vecy1))
+        Call WriteVar(StreamFile, Val(LoopC), "VecY2", Val(StreamData(LoopC).vecy2))
+        Call WriteVar(StreamFile, Val(LoopC), "Life1", Val(StreamData(LoopC).life1))
+        Call WriteVar(StreamFile, Val(LoopC), "Life2", Val(StreamData(LoopC).life2))
+        Call WriteVar(StreamFile, Val(LoopC), "Friction", Val(StreamData(LoopC).friction))
+        Call WriteVar(StreamFile, Val(LoopC), "Spin", Val(StreamData(LoopC).spin))
+        Call WriteVar(StreamFile, Val(LoopC), "Spin_SpeedL", Val(StreamData(LoopC).spin_speedL))
+        Call WriteVar(StreamFile, Val(LoopC), "Spin_SpeedH", Val(StreamData(LoopC).spin_speedH))
+        Call WriteVar(StreamFile, Val(LoopC), "Grav_Strength", Val(StreamData(LoopC).grav_strength))
+        Call WriteVar(StreamFile, Val(LoopC), "Bounce_Strength", Val(StreamData(LoopC).bounce_strength))
+    
+        Call WriteVar(StreamFile, Val(LoopC), "AlphaBlend", Val(StreamData(LoopC).AlphaBlend))
+        Call WriteVar(StreamFile, Val(LoopC), "Gravity", Val(StreamData(LoopC).gravity))
+    
+        Call WriteVar(StreamFile, Val(LoopC), "XMove", Val(StreamData(LoopC).XMove))
+        Call WriteVar(StreamFile, Val(LoopC), "YMove", Val(StreamData(LoopC).YMove))
+        Call WriteVar(StreamFile, Val(LoopC), "move_x1", Val(StreamData(LoopC).move_x1))
+        Call WriteVar(StreamFile, Val(LoopC), "move_x2", Val(StreamData(LoopC).move_x2))
+        Call WriteVar(StreamFile, Val(LoopC), "move_y1", Val(StreamData(LoopC).move_y1))
+        Call WriteVar(StreamFile, Val(LoopC), "move_y2", Val(StreamData(LoopC).move_y2))
+        Call WriteVar(StreamFile, Val(LoopC), "Radio", Val(StreamData(LoopC).Radio))
+        Call WriteVar(StreamFile, Val(LoopC), "life_counter", Val(StreamData(LoopC).life_counter))
+        Call WriteVar(StreamFile, Val(LoopC), "Speed", Str(StreamData(LoopC).speed))
+    
+        Call WriteVar(StreamFile, Val(LoopC), "resize", CInt(StreamData(LoopC).grh_resize))
+        Call WriteVar(StreamFile, Val(LoopC), "rx", StreamData(LoopC).grh_resizex)
+        Call WriteVar(StreamFile, Val(LoopC), "ry", StreamData(LoopC).grh_resizey)
+    
+        Call WriteVar(StreamFile, Val(LoopC), "NumGrhs", Val(StreamData(LoopC).NumGrhs))
+    
+        GrhListing = vbNullString
 
-        With StreamData(LoopC)
-        
-            Call FileManager.ChangeValue(Val(LoopC), "Name", .Name)
-            Call FileManager.ChangeValue(Val(LoopC), "NumOfParticles", Val(.NumOfParticles))
-            Call FileManager.ChangeValue(Val(LoopC), "X1", Val(.x1))
-            Call FileManager.ChangeValue(Val(LoopC), "Y1", Val(.y1))
-            Call FileManager.ChangeValue(Val(LoopC), "X2", Val(.x2))
-            Call FileManager.ChangeValue(Val(LoopC), "Y2", Val(.y2))
-            Call FileManager.ChangeValue(Val(LoopC), "Angle", Val(.angle))
-            Call FileManager.ChangeValue(Val(LoopC), "VecX1", Val(.vecx1))
-            Call FileManager.ChangeValue(Val(LoopC), "VecX2", Val(.vecx2))
-            Call FileManager.ChangeValue(Val(LoopC), "VecY1", Val(.vecy1))
-            Call FileManager.ChangeValue(Val(LoopC), "VecY2", Val(.vecy2))
-            Call FileManager.ChangeValue(Val(LoopC), "Life1", Val(.life1))
-            Call FileManager.ChangeValue(Val(LoopC), "Life2", Val(.life2))
-            Call FileManager.ChangeValue(Val(LoopC), "Friction", Val(.friction))
-            Call FileManager.ChangeValue(Val(LoopC), "Spin", Val(.spin))
-            Call FileManager.ChangeValue(Val(LoopC), "Spin_SpeedL", Val(.spin_speedL))
-            Call FileManager.ChangeValue(Val(LoopC), "Spin_SpeedH", Val(.spin_speedH))
-            Call FileManager.ChangeValue(Val(LoopC), "Grav_Strength", Val(.grav_strength))
-            Call FileManager.ChangeValue(Val(LoopC), "Bounce_Strength", Val(.bounce_strength))
+        For i = 1 To StreamData(LoopC).NumGrhs
+            GrhListing = GrhListing & StreamData(LoopC).grh_list(i) & ","
+        Next i
     
-            Call FileManager.ChangeValue(Val(LoopC), "AlphaBlend", Val(.AlphaBlend))
-            Call FileManager.ChangeValue(Val(LoopC), "Gravity", Val(.gravity))
+        Call WriteVar(StreamFile, Val(LoopC), "Grh_List", GrhListing)
     
-            Call FileManager.ChangeValue(Val(LoopC), "XMove", Val(.XMove))
-            Call FileManager.ChangeValue(Val(LoopC), "YMove", Val(.YMove))
-            Call FileManager.ChangeValue(Val(LoopC), "move_x1", Val(.move_x1))
-            Call FileManager.ChangeValue(Val(LoopC), "move_x2", Val(.move_x2))
-            Call FileManager.ChangeValue(Val(LoopC), "move_y1", Val(.move_y1))
-            Call FileManager.ChangeValue(Val(LoopC), "move_y2", Val(.move_y2))
-            Call FileManager.ChangeValue(Val(LoopC), "Radio", Val(.Radio))
-            Call FileManager.ChangeValue(Val(LoopC), "life_counter", Val(.life_counter))
-            Call FileManager.ChangeValue(Val(LoopC), "Speed", Str$(.speed))
+        Call WriteVar(StreamFile, Val(LoopC), "ColorSet1", StreamData(LoopC).colortint(0).r & "," & StreamData(LoopC).colortint(0).g & "," & StreamData(LoopC).colortint(0).B)
+        Call WriteVar(StreamFile, Val(LoopC), "ColorSet2", StreamData(LoopC).colortint(1).r & "," & StreamData(LoopC).colortint(1).g & "," & StreamData(LoopC).colortint(1).B)
+        Call WriteVar(StreamFile, Val(LoopC), "ColorSet3", StreamData(LoopC).colortint(2).r & "," & StreamData(LoopC).colortint(2).g & "," & StreamData(LoopC).colortint(2).B)
+        Call WriteVar(StreamFile, Val(LoopC), "ColorSet4", StreamData(LoopC).colortint(3).r & "," & StreamData(LoopC).colortint(3).g & "," & StreamData(LoopC).colortint(3).B)
     
-            Call FileManager.ChangeValue(Val(LoopC), "resize", CInt(.grh_resize))
-            Call FileManager.ChangeValue(Val(LoopC), "rx", .grh_resizex)
-            Call FileManager.ChangeValue(Val(LoopC), "ry", .grh_resizey)
-    
-            Call FileManager.ChangeValue(Val(LoopC), "NumGrhs", Val(.NumGrhs))
-    
-            GrhListing = vbNullString
-
-            For i = 1 To .NumGrhs
-                GrhListing = GrhListing & .grh_list(i) & ","
-            Next i
-    
-            Call FileManager.ChangeValue(Val(LoopC), "Grh_List", GrhListing)
-            
-            For j = 0 To 3
-                Call FileManager.ChangeValue(Val(LoopC), "ColorSet1", .colortint(j).r & "," & .colortint(j).g & "," & .colortint(j).B)
-            Next j
-
-        End With
-        
-        Call FileManager.DumpFile(StreamFile)
-        
     Next LoopC
-    
-    Set FileManager = Nothing
         
     'Report the results
     If TotalStreams > 1 Then
         Call MsgBox(TotalStreams & " Particulas guardadas en: " & vbCrLf & StreamFile, vbInformation)
     Else
         Call MsgBox(TotalStreams & " Particulas guardadas en: " & vbCrLf & StreamFile, vbInformation)
+
     End If
     
     'Set DataChanged variable to false
