@@ -1,5 +1,6 @@
 # ao-particle-editor
 Particle editor for Argentum Online
+<img src="https://cdn.discordapp.com/attachments/479064501115944962/657073604449665025/unknown.png">
 
 
 Usar recursos de este proyecto: https://github.com/ao-libre/ao-cliente
