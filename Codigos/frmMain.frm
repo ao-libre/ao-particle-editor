@@ -79,7 +79,7 @@ Begin VB.Form frmMain
          Width           =   615
       End
       Begin VB.CommandButton cmdAdd 
-         Caption         =   "Añadir"
+         Caption         =   "Agregar"
          Height          =   255
          Left            =   0
          TabIndex        =   92
@@ -1021,7 +1021,7 @@ Begin VB.Form frmMain
    End
    Begin VB.Label Label2 
       Alignment       =   2  'Center
-      Caption         =   "Adaptado y Traducido por Lorwik www.RincondelAO.com.ar"
+      Caption         =   "Adaptado y Traducido por Lorwik www.ArgentumOnline.org"
       BeginProperty Font 
          Name            =   "Tahoma"
          Size            =   12
@@ -1062,7 +1062,7 @@ Begin VB.Form frmMain
       End
    End
    Begin VB.Menu Mas 
-      Caption         =   "Más"
+      Caption         =   "Mas"
       Begin VB.Menu sobre 
          Caption         =   "Sobre..."
       End
@@ -1089,7 +1089,7 @@ Private Sub Command4_Click()
 
     If FileExists(CurStreamFile, vbNormal) = True Then
         
-        RetVal = MsgBox("¡El archivo " & CurStreamFile & " ya existe!" & vbCrLf & "¿Deseas sobreescribirlo?", vbYesNoCancel Or vbQuestion)
+        RetVal = MsgBox("El archivo " & CurStreamFile & " ya existe!" & vbCrLf & "Deseas sobreescribirlo?", vbYesNoCancel Or vbQuestion)
         
         Select Case RetVal
         
@@ -1117,7 +1117,7 @@ Private Sub Command4_Click()
     
         If FileExists(StreamFile, vbNormal) = True Then
             
-            RetVal = MsgBox("¡El archivo " & StreamFile & " ya existe!" & vbCrLf & "¿Desea sobreescribirlo?", vbYesNo Or vbQuestion)
+            RetVal = MsgBox("El archivo " & StreamFile & " ya existe!" & vbCrLf & "Desea sobreescribirlo?", vbYesNo Or vbQuestion)
 
             If RetVal = vbNo Then Exit Sub
 
