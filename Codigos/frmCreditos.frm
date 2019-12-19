@@ -33,7 +33,7 @@ Begin VB.Form frmCreditos
    End
    Begin VB.Label Label1 
       Alignment       =   2  'Center
-      Caption         =   "www.RincondelAO.com.ar"
+      Caption         =   "www.ArgentumOnline.org"
       BeginProperty Font 
          Name            =   "MS Sans Serif"
          Size            =   8.25
