@@ -17,6 +17,8 @@ Option Explicit
 
 Const HASH_TABLE_SIZE           As Long = 337
 
+Private DirGraficos As String
+
 Private Type SURFACE_ENTRY_DYN
     FileName As Integer
     UltimoAcceso As Long
@@ -120,7 +122,9 @@ Public Function Init(ByRef D3D8 As D3DX8, _
     Set mD3D = D3D8
     Set device = d3d_device
     mFreeMemoryBytes = 0
-
+    
+    DirGraficos = App.Path & "\GRAFICOS\"
+    
     Init = True
 
 End Function
@@ -139,6 +143,8 @@ Private Function CrearGrafico(ByVal Archivo As Integer, _
     Dim surface_desc As D3DSURFACE_DESC
     Dim texture_info As D3DXIMAGE_INFO
     Dim index        As Integer
+    Dim Graphic      As String
+    Dim Buffer()     As Byte
         
     index = Archivo Mod HASH_TABLE_SIZE
 
@@ -147,14 +153,42 @@ Private Function CrearGrafico(ByVal Archivo As Integer, _
         ReDim Preserve .SurfaceEntry(1 To .surfaceCount) As SURFACE_ENTRY_DYN
 
         With .SurfaceEntry(.surfaceCount)
+            
             'Nombre
             .FileName = Archivo
             
             'Ultimo acceso
             .UltimoAcceso = GetTickCount
-    
-            Set .texture = mD3D.CreateTextureFromFileEx(device, App.Path & "\GRAFICOS\" & LTrim$(Str$(Archivo)) & ".bmp", D3DX_DEFAULT, D3DX_DEFAULT, 3, 0, D3DFMT_A8R8G8B8, D3DPOOL_MANAGED, D3DX_FILTER_NONE, D3DX_FILTER_NONE, &HFF000000, texture_info, ByVal 0)
+            
+            If FileExists(DirGraficos & "Graphics.AO", vbNormal) Then
                 
+                'Obtenemos el .bmp del archivo en Graphics.AO
+                Call modCompression.Get_Image(DirGraficos, CStr(Archivo), Buffer())
+                
+                'Seteamos la textura.
+                Set .texture = mD3D.CreateTextureFromFileInMemoryEx(device, Buffer(0), UBound(Buffer()) + 1, D3DX_DEFAULT, D3DX_DEFAULT, 0, 0, D3DFMT_A8R8G8B8, D3DPOOL_MANAGED, D3DX_FILTER_POINT, D3DX_FILTER_NONE, &HFF000000, texture_info, ByVal 0)
+                
+                Erase Buffer
+                
+            Else
+            
+                Graphic = DirGraficos & LTrim$(Str$(Archivo))
+            
+                If FileExists(Graphic & ".png", vbNormal) Then
+                    Graphic = Graphic & ".png"
+            
+                ElseIf FileExists(Graphic & ".bmp", vbNormal) Then
+                    Graphic = Graphic & ".bmp"
+                
+                Else
+                    Call MsgBox("No se pudo cargar el grafico: " & Graphic)
+            
+                End If
+                
+                Set .texture = mD3D.CreateTextureFromFileEx(device, Graphic, D3DX_DEFAULT, D3DX_DEFAULT, 3, 0, D3DFMT_A8R8G8B8, D3DPOOL_MANAGED, D3DX_FILTER_NONE, D3DX_FILTER_NONE, &HFF000000, texture_info, ByVal 0)
+                
+            End If
+            
             .texture.GetLevelDesc 0, surface_desc
             .texture_width = texture_info.Width
             .texture_height = texture_info.Height

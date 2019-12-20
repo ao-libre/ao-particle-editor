@@ -15,6 +15,7 @@ Form=Codigos\frmCreditos.frm
 Module=mDx8_Engine; Codigos\mDx8_Engine.bas
 Module=mDx8_Particulas; Codigos\mDx8_Particulas.bas
 Class=clsIniManager; Codigos\clsIniManager.cls
+Module=modCompression; Codigos\modCompression.bas
 IconForm="frmCargando"
 Startup="Sub Main"
 HelpFile=""
