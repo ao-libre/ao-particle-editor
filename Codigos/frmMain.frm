@@ -1,5 +1,5 @@
 VERSION 5.00
-Object = "{F9043C88-F6F2-101A-A3C9-08002B2F49FB}#1.2#0"; "COMDLG32.OCX"
+Object = "{F9043C88-F6F2-101A-A3C9-08002B2F49FB}#1.2#0"; "comdlg32.ocx"
 Object = "{831FDD16-0C5C-11D2-A9FC-0000F8754DA1}#2.1#0"; "MSCOMCTL.OCX"
 Begin VB.Form frmMain 
    BackColor       =   &H00FFFFFF&
@@ -73,18 +73,27 @@ Begin VB.Form frmMain
       Begin VB.CommandButton cmdDelete 
          Caption         =   "Borrar"
          Height          =   255
-         Left            =   600
+         Left            =   720
          TabIndex        =   93
          Top             =   3840
          Width           =   615
       End
       Begin VB.CommandButton cmdAdd 
          Caption         =   "Agregar"
+         BeginProperty Font 
+            Name            =   "Arial"
+            Size            =   8.25
+            Charset         =   0
+            Weight          =   400
+            Underline       =   0   'False
+            Italic          =   0   'False
+            Strikethrough   =   0   'False
+         EndProperty
          Height          =   255
          Left            =   0
          TabIndex        =   92
          Top             =   3840
-         Width           =   615
+         Width           =   735
       End
       Begin VB.ListBox lstSelGrhs 
          BackColor       =   &H00C0C0C0&
@@ -105,7 +114,7 @@ Begin VB.Form frmMain
       Begin VB.CommandButton cmdClear 
          Caption         =   "Limpiar"
          Height          =   255
-         Left            =   1200
+         Left            =   1320
          TabIndex        =   89
          Top             =   3840
          Width           =   615
@@ -1083,15 +1092,15 @@ Private Sub Command4_Click()
     
     Dim StreamFile As String
     Dim Bypass     As Boolean
-    Dim RetVal     As Byte
+    Dim retval     As Byte
 
     CurStreamFile = App.Path & "\INIT\Particles.ini"
 
     If FileExists(CurStreamFile, vbNormal) = True Then
         
-        RetVal = MsgBox("El archivo " & CurStreamFile & " ya existe!" & vbCrLf & "Deseas sobreescribirlo?", vbYesNoCancel Or vbQuestion)
+        retval = MsgBox("El archivo " & CurStreamFile & " ya existe!" & vbCrLf & "Deseas sobreescribirlo?", vbYesNoCancel Or vbQuestion)
         
-        Select Case RetVal
+        Select Case retval
         
             Case vbNo
                 Bypass = False
@@ -1117,9 +1126,9 @@ Private Sub Command4_Click()
     
         If FileExists(StreamFile, vbNormal) = True Then
             
-            RetVal = MsgBox("El archivo " & StreamFile & " ya existe!" & vbCrLf & "Desea sobreescribirlo?", vbYesNo Or vbQuestion)
+            retval = MsgBox("El archivo " & StreamFile & " ya existe!" & vbCrLf & "Desea sobreescribirlo?", vbYesNo Or vbQuestion)
 
-            If RetVal = vbNo Then Exit Sub
+            If retval = vbNo Then Exit Sub
 
         End If
 
@@ -2252,10 +2261,11 @@ Private Sub lstGrhs_DblClick()
 End Sub
 
 Private Sub cmdAdd_Click()
-    
+   ' lstGrhs.Selected
     ' [PARCHE - By Jopi] - Al clickear en un Grh animado tira Error 9.
-    If InStrB(1, "(animacion)", "(animacion)", vbTextCompare) Then Exit Sub
-    
+    ' [PARCHE - By Recox] - Arreglo mankeada de Jopi :)
+    If InStr(lstGrhs.Text, "(animacion)") Then Exit Sub
+
     Dim LoopC As Long
 
     If lstGrhs.ListIndex >= 0 Then
