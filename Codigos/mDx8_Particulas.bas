@@ -160,7 +160,7 @@ Public particle_group_last   As Long
  
 Public Sub LoadStreamFile(ByVal StreamFile As String)
 
-    On Error Resume Next
+    On Error GoTo Error
 
     Dim LoopC As Long
     Dim i          As Long
@@ -257,7 +257,15 @@ Public Sub LoadStreamFile(ByVal StreamFile As String)
     'set list box index to 1st item
     frmMain.List2.ListIndex = 0
     
+    frmMain.CurStreamFile = StreamFile
+    
     Set FileManager = Nothing
+
+Exit Sub
+Error:
+
+    Call MsgBox("Ha ocurrido un error en la carga de " & StreamFile & ": " & Err.Number & " - " & Err.Description)
+
 
 End Sub
 

@@ -2,14 +2,14 @@ VERSION 5.00
 Begin VB.Form frmCreditos 
    BorderStyle     =   4  'Fixed ToolWindow
    Caption         =   "Acerca de..."
-   ClientHeight    =   2325
+   ClientHeight    =   2910
    ClientLeft      =   45
    ClientTop       =   315
    ClientWidth     =   4545
    LinkTopic       =   "Form1"
    MaxButton       =   0   'False
    MinButton       =   0   'False
-   ScaleHeight     =   2325
+   ScaleHeight     =   2910
    ScaleWidth      =   4545
    ShowInTaskbar   =   0   'False
    StartUpPosition =   1  'CenterOwner
@@ -22,6 +22,16 @@ Begin VB.Form frmCreditos
       TabIndex        =   3
       Top             =   2040
       Width           =   2340
+   End
+   Begin VB.Label Label3 
+      BackStyle       =   0  'Transparent
+      Caption         =   "Corregido por ^[GS] ^ Dic/2021"
+      ForeColor       =   &H00000000&
+      Height          =   420
+      Left            =   300
+      TabIndex        =   6
+      Top             =   2370
+      Width           =   3885
    End
    Begin VB.Label Label2 
       Caption         =   "Contacto: LwK_AO@hotmail.com"
