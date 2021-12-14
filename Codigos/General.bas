@@ -1,6 +1,49 @@
 Attribute VB_Name = "Mod_General"
 Option Explicit
 
+Public InitPath As String
+Public GraphicsPath As String
+
+Public GraphicsFile As String
+Public ParticlesFile As String
+
+Public VelocityDefault As Single
+
+Public Sub LoadConfig()
+
+    Dim Leer As New clsIniManager
+    
+    If FileExists(App.Path & "\EditorParticulas.ini", vbArchive) = False Then
+        InitPath = App.Path & "\Init\"
+        GraphicsPath = App.Path & "\Graficos\"
+        GraphicsFile = InitPath & "Graficos.ind"
+        ParticlesFile = InitPath & "Particulas.ini"
+        VelocityDefault = 0.5
+        MsgBox "Falta el archivo 'EditorParticulas.ini' de configuración.", vbInformation
+        Exit Sub
+    End If
+    
+    Call Leer.Initialize(App.Path & "\EditorParticulas.ini")
+    
+    VelocityDefault = Val(Leer.GetValue("VELOCITY", "default"))
+    
+    InitPath = App.Path & "\" & Leer.GetValue("PATH", "Init")
+    GraphicsPath = App.Path & "\" & Leer.GetValue("PATH", "Graphics")
+    GraphicsFile = InitPath & Leer.GetValue("PATH", "GraphicsFile")
+    ParticlesFile = InitPath & Leer.GetValue("PATH", "ParticlesFile")
+    
+    If Len(InitPath) = 0 Then
+        InitPath = App.Path & "\Init\"
+        GraphicsFile = InitPath & "Graficos.ind"
+        ParticlesFile = InitPath & "Particulas.ini"
+    End If
+    
+    If Len(GraphicsPath) = 0 Then
+        GraphicsPath = App.Path & "\Graficos\"
+    End If
+    
+End Sub
+
 Public Sub LoadGrhData()
 
     On Error GoTo ErrorHandler
@@ -14,7 +57,7 @@ Public Sub LoadGrhData()
     'Open files
     handle = FreeFile()
 
-    Open App.Path & "\INIT\Graficos.ind" For Binary Access Read As handle
+    Open GraphicsFile For Binary Access Read As handle
     Seek #handle, 1
    
     'Get file version
@@ -99,11 +142,6 @@ ErrorHandler:
 
 End Sub
 
-Public Function DirGraficos() As String
-    DirGraficos = App.Path & "\GRAFICOS\"
-
-End Function
-
 Sub AddtoRichTextBox(ByRef RichTextBox As RichTextBox, _
                      ByVal Text As String, _
                      Optional ByVal red As Integer = -1, _
@@ -168,6 +206,8 @@ Sub Main()
     Call ChDrive(App.Path)
     Call ChDir(App.Path)
     
+    Call LoadConfig
+    
     With frmCargando
         .Show
         .Refresh
@@ -186,6 +226,10 @@ Sub Main()
     
     Call AgregaGrH(1)
     Unload frmCargando
+    
+    If FileExists(ParticlesFile, vbArchive) Then
+        Call LoadStreamFile(ParticlesFile)
+    End If
                    
     frmMain.Show
 

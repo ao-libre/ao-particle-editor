@@ -577,6 +577,7 @@ Public Sub Start()
         End If
 
         DoEvents
+        DoEvents
 
     Loop
     
@@ -631,7 +632,7 @@ Public Sub GrhRenderToHdc(ByVal grh_index As Long, _
             grh_index = .Frames(1)
         End If
 
-        file_path = DirGraficos & .FileNum & ".bmp"
+        file_path = GraphicsPath & .FileNum & ".bmp"
         
         src_x = .SX
         src_y = .SY

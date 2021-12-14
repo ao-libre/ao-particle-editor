@@ -1,6 +1,6 @@
 VERSION 5.00
 Object = "{F9043C88-F6F2-101A-A3C9-08002B2F49FB}#1.2#0"; "comdlg32.ocx"
-Object = "{831FDD16-0C5C-11D2-A9FC-0000F8754DA1}#2.1#0"; "MSCOMCTL.OCX"
+Object = "{831FDD16-0C5C-11D2-A9FC-0000F8754DA1}#2.2#0"; "MSCOMCTL.OCX"
 Begin VB.Form frmMain 
    BackColor       =   &H00FFFFFF&
    BorderStyle     =   0  'None
@@ -16,6 +16,14 @@ Begin VB.Form frmMain
    ScaleWidth      =   11490
    StartUpPosition =   1  'CenterOwner
    WhatsThisHelp   =   -1  'True
+   Begin VB.CheckBox checkPreview 
+      BackColor       =   &H8000000B&
+      Height          =   375
+      Left            =   1950
+      TabIndex        =   104
+      Top             =   5640
+      Width           =   315
+   End
    Begin VB.CommandButton cmdOpenStreamFile 
       Caption         =   "&Open Stream File"
       Height          =   255
@@ -943,6 +951,11 @@ Begin VB.Form frmMain
       TabIndex        =   5
       Top             =   0
       Width           =   7035
+      Begin VB.Timer timerPreview 
+         Interval        =   1000
+         Left            =   3090
+         Top             =   5640
+      End
       Begin MSComDlg.CommonDialog ComDlg 
          Left            =   0
          Top             =   0
@@ -976,12 +989,14 @@ Begin VB.Form frmMain
       Width           =   2175
    End
    Begin VB.CommandButton Command6 
+      BackColor       =   &H008080FF&
       Caption         =   "Vista Previa"
       Height          =   375
       Left            =   120
+      Style           =   1  'Graphical
       TabIndex        =   0
       Top             =   5640
-      Width           =   2175
+      Width           =   1725
    End
    Begin MSComctlLib.TabStrip TabStrip1 
       Height          =   2670
@@ -1087,6 +1102,37 @@ Option Explicit
 
 '--> Current Stream File <--
 Public CurStreamFile As String
+
+Private Sub cmdClear_Click()
+
+    Dim LoopC As Long
+
+    lstSelGrhs.Clear
+    
+    With StreamData(List2.ListIndex + 1)
+    
+        If lstSelGrhs.ListCount = 0 Then
+            ' GS Prevent empty
+            lstSelGrhs.AddItem 1
+        End If
+    
+        .NumGrhs = lstSelGrhs.ListCount
+
+        If .NumGrhs = 0 Then
+            Erase .grh_list
+        Else
+            ReDim .grh_list(1 To lstSelGrhs.ListCount)
+        End If
+
+        For LoopC = 1 To .NumGrhs
+            .grh_list(LoopC) = lstSelGrhs.List(LoopC - 1)
+        Next LoopC
+    
+    End With
+    
+    DataChanged = True
+
+End Sub
 
 Private Sub Command4_Click()
     
@@ -1236,6 +1282,8 @@ Private Sub Command5_Click()
 
     grhlist(0) = 19751
     
+    ReDim Preserve StreamData(1 To NewStreamNumber) As Stream
+
     'Add stream data to StreamData array
     With StreamData(NewStreamNumber)
         .Name = Nombre
@@ -1267,10 +1315,17 @@ Private Sub Command5_Click()
         .move_y2 = 0
         .life_counter = -1
         .NumGrhs = 1
-        .grh_list = grhlist()
+        ReDim .grh_list(1 To .NumGrhs)
+        .grh_list(1) = 1
+        Dim a As Integer
+        For a = 0 To 3
+            .colortint(a).B = 255
+            .colortint(a).g = 255
+            .colortint(a).r = 255
+        Next
+        
     End With
     
-
     'Select the new stream type in the combo box
     List2.ListIndex = NewStreamNumber - 1
 
@@ -1388,6 +1443,9 @@ Sub CargarParticulasLista()
         End If
 
         speed.Text = .speed
+        If speed.Text = "0" Then
+            speed.Text = Str(VelocityDefault)
+        End If
 
         lstSelGrhs.Clear
 
@@ -1400,6 +1458,9 @@ Sub CargarParticulasLista()
     DataChanged = DataTemp
 
     indexs = frmMain.List2.ListIndex + 1
+    
+    Call Particle_Group_Remove_All
+    DoEvents
 
     Call General_Particle_Create(indexs, 50, 50)
 
@@ -1479,7 +1540,6 @@ Private Sub cmdOpenStreamFile_Click()
     
     If LenB(sFile) Then
         Call LoadStreamFile(sFile)
-        CurStreamFile = sFile
     End If
     
 End Sub
@@ -1591,6 +1651,13 @@ Private Sub TabStrip1_Click()
 
     End Select
 
+End Sub
+
+Private Sub timerPreview_Timer()
+    If checkPreview And DataChanged Then
+        If List2.ListIndex < 0 Then Exit Sub
+        Call CargarParticulasLista
+    End If
 End Sub
 
 Private Sub txRad_Change()
@@ -2218,7 +2285,7 @@ End Sub
 Private Sub cmdDelete_Click()
     
     ' [PARCHE - By Jopi] - Al clickear en un Grh animado tira Error 9.
-    If InStrB(1, "(animacion)", "(animacion)", vbTextCompare) Then Exit Sub
+    'If InStrB(1, "(animacion)", "(animacion)", vbTextCompare) Then Exit Sub
     
     Dim LoopC As Long
 
@@ -2227,6 +2294,11 @@ Private Sub cmdDelete_Click()
     End If
     
     With StreamData(List2.ListIndex + 1)
+    
+        If lstSelGrhs.ListCount = 0 Then
+            ' GS Prevent empty
+            lstSelGrhs.AddItem 1
+        End If
     
         .NumGrhs = lstSelGrhs.ListCount
 
@@ -2241,6 +2313,8 @@ Private Sub cmdDelete_Click()
         Next LoopC
     
     End With
+    
+    DataChanged = True
 
 End Sub
 
@@ -2284,6 +2358,8 @@ Private Sub cmdAdd_Click()
         Next LoopC
     
     End With
+    
+    DataChanged = True
     
 End Sub
 

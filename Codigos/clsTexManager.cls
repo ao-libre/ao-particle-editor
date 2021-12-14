@@ -160,7 +160,7 @@ Private Function CrearGrafico(ByVal Archivo As Integer, _
             'Ultimo acceso
             .UltimoAcceso = GetTickCount
             
-            If FileExists(DirGraficos & "Graphics.AO", vbNormal) Then
+            If FileExists(GraphicsPath & "Graphics.AO", vbNormal) Then
                 
                 'Obtenemos el .bmp del archivo en Graphics.AO
                 Call modCompression.Get_Image(DirGraficos, CStr(Archivo), Buffer())
@@ -172,7 +172,7 @@ Private Function CrearGrafico(ByVal Archivo As Integer, _
                 
             Else
             
-                Graphic = DirGraficos & LTrim$(Str$(Archivo))
+                Graphic = GraphicsPath & LTrim$(Str$(Archivo))
             
                 If FileExists(Graphic & ".png", vbNormal) Then
                     Graphic = Graphic & ".png"
