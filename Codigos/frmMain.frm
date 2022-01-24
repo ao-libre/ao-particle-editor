@@ -43,9 +43,9 @@ Begin VB.Form frmMain
       Begin VB.ListBox List2 
          BackColor       =   &H00C0C0C0&
          Height          =   4155
-         ItemData        =   "frmMain.frx":000C
+         ItemData        =   "frmMain.frx":1E91B
          Left            =   45
-         List            =   "frmMain.frx":000E
+         List            =   "frmMain.frx":1E91D
          TabIndex        =   98
          Top             =   240
          Width           =   2295
@@ -942,7 +942,7 @@ Begin VB.Form frmMain
       Appearance      =   0  'Flat
       BackColor       =   &H00000000&
       BorderStyle     =   0  'None
-      ForeColor       =   &H80000008&
+      ForeColor       =   &H00000000&
       Height          =   6525
       Left            =   2400
       ScaleHeight     =   435
@@ -1134,13 +1134,15 @@ Private Sub cmdClear_Click()
 
 End Sub
 
+
+
 Private Sub Command4_Click()
     
     Dim StreamFile As String
     Dim Bypass     As Boolean
     Dim retval     As Byte
 
-    CurStreamFile = App.Path & "\INIT\Particles.ini"
+    CurStreamFile = InitPath & "Particulas.ini"
 
     If FileExists(CurStreamFile, vbNormal) = True Then
         
@@ -1253,6 +1255,8 @@ Private Sub Command4_Click()
         Call MsgBox(TotalStreams & " Particulas guardadas en: " & vbCrLf & StreamFile, vbInformation)
 
     End If
+    
+    Call LoadStreamFile(ParticlesFile)
     
     'Set DataChanged variable to false
     DataChanged = False

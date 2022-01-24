@@ -1,5 +1,5 @@
 VERSION 5.00
-Object = "{3B7C8863-D78F-101B-B9B5-04021C009402}#1.2#0"; "Richtx32.ocx"
+Object = "{3B7C8863-D78F-101B-B9B5-04021C009402}#1.2#0"; "RICHTX32.ocx"
 Begin VB.Form frmCargando 
    AutoRedraw      =   -1  'True
    BackColor       =   &H000080FF&
@@ -10,10 +10,11 @@ Begin VB.Form frmCargando
    ClientWidth     =   4440
    ControlBox      =   0   'False
    FillStyle       =   0  'Solid
+   Icon            =   "frmCargando.frx":0000
    LinkTopic       =   "Form1"
    MaxButton       =   0   'False
    MinButton       =   0   'False
-   Picture         =   "frmCargando.frx":0000
+   Picture         =   "frmCargando.frx":1E91B
    ScaleHeight     =   120
    ScaleMode       =   3  'Pixel
    ScaleWidth      =   296
@@ -31,9 +32,10 @@ Begin VB.Form frmCargando
       _ExtentY        =   1270
       _Version        =   393217
       BackColor       =   14737632
+      Enabled         =   -1  'True
       ReadOnly        =   -1  'True
       ScrollBars      =   2
-      TextRTF         =   $"frmCargando.frx":0C7C
+      TextRTF         =   $"frmCargando.frx":1F597
       BeginProperty Font {0BE35203-8F91-11CE-9DE3-00AA004BB851} 
          Name            =   "Verdana"
          Size            =   8.25
